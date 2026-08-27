@@ -1,121 +1,121 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useState, useEffect } from 'react'
+
+const VATSIM_AUTH_URL = 'https://auth-dev.vatsim.net/oauth/authorize'
+const CLIENT_ID = import.meta.env.VITE_VATSIM_CLIENT_ID
+const REDIRECT_URI = 'http://localhost:5173/'
+const BACKEND_URL = 'http://localhost:4000'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [user, setUser] = useState(null)
+  const [error, setError] = useState(null)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const code = params.get('code')
+
+    if (code) {
+      window.history.replaceState({}, '', '/')
+      exchangeCodeForUser(code)
+    }
+  }, [])
+
+  const exchangeCodeForUser = async (code) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/auth/callback`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || 'Something went wrong')
+      } else {
+        setUser(data)
+      }
+    } catch (err) {
+      setError('Could not reach backend server')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const loginWithVatsim = () => {
+    const params = new URLSearchParams({
+      client_id: CLIENT_ID,
+      redirect_uri: REDIRECT_URI,
+      response_type: 'code',
+      scope: 'full_name email vatsim_details',
+      prompt: 'login',
+    })
+    window.location.href = `${VATSIM_AUTH_URL}?${params.toString()}`
+  }
+
+  const logout = () => {
+    setUser(null)
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-6">
+      <div className="bg-white/5 border border-white/10 rounded-2xl p-8 max-w-md w-full text-left">
+        <h1 className="text-2xl font-bold text-white mb-6">ZAN RTAC</h1>
 
-      <div className="ticks"></div>
+        {!user && !loading && (
+          <button
+            onClick={loginWithVatsim}
+            className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg"
+          >
+            Login with VATSIM (sandbox)
+          </button>
+        )}
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+        {loading && <p className="text-slate-400">Exchanging code with backend...</p>}
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+        {error && <p className="text-red-400 text-sm break-all">Error: {error}</p>}
+
+        {user && (
+          <div className="text-slate-200 space-y-1">
+            <p className="text-green-400 mb-2">✓ Logged in</p>
+            <p><span className="text-slate-400">Name:</span> {user.name}</p>
+            <p><span className="text-slate-400">CID:</span> {user.cid}</p>
+            <p><span className="text-slate-400">Rating:</span> {user.rating}</p>
+            <p><span className="text-slate-400">Division:</span> {user.division}</p>
+            <p><span className="text-slate-400">Email:</span> {user.email}</p>
+
+            <div className="mt-4 pt-4 border-t border-white/10 space-y-1">
+              <p>
+                <span className="text-slate-400">ZAN Visitor:</span>{' '}
+                {user.isZanVisitor ? 'Yes' : 'No'}
+              </p>
+              <p>
+                <span className="text-slate-400">ZAN Role:</span>{' '}
+                {user.zanRole ?? 'None'}
+              </p>
+            </div>
+
+            {/* Role-gated content - only shows for certain ZAN roles */}
+            {user.zanRole && (
+              <div className="mt-4 p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+                <p className="text-purple-300 text-sm">
+                  Staff controls visible here (holds role: {user.zanRole})
+                </p>
+              </div>
+            )}
+
+            <button
+              onClick={logout}
+              className="mt-4 text-sm text-slate-400 hover:text-white"
+            >
+              Log out
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
   )
 }
 
