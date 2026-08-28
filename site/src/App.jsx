@@ -1,23 +1,24 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import Home from './pages/Home'
 import About from './pages/About'
-import Roster from './pages/Roster'
+import RosterHome from './pages/RosterHome'
+import RosterVisiting from './pages/RosterVisiting'
+import ApplyToVisit from './pages/ApplyToVisit'
+import Profile from './pages/Profile'
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <nav className="bg-slate-800 p-4 flex gap-4">
-          <Link to="/" className="text-white hover:text-purple-400">Home</Link>
-          <Link to="/about" className="text-white hover:text-purple-400">About</Link>
-          <Link to="/roster" className="text-white hover:text-purple-400">Roster</Link>
-        </nav>
-
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
-          <Route path="/roster" element={<Roster />} />
+          <Route path="/roster" element={<RosterHome />} />
+          <Route path="/roster/home" element={<RosterHome />} />
+          <Route path="/roster/visiting" element={<RosterVisiting />} />
+          <Route path="/apply" element={<ApplyToVisit />} />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

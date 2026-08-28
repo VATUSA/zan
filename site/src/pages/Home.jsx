@@ -1,22 +1,12 @@
+    
+import Navbar from '../components/Navbar'
+import Footer from '../components/Footer'
+    
     function Home() {
     return (
         <div className="bg-navy text-ink font-mulish">
         {/* Header */}
-        <header className="sticky top-0 z-40 flex flex-wrap items-center gap-4 px-10 py-5 bg-navy/80 backdrop-blur-xl">
-            <div className="flex items-center gap-3">
-            <img src="/logo-no-text.png" alt="Anchorage ARTCC" className="w-10 h-10" />
-            <span className="font-extrabold text-[17px] tracking-tight">Anchorage ARTCC</span>
-            </div>
-            <nav className="flex flex-wrap gap-1 ml-auto text-[14.5px] font-semibold">
-            <a href="#airspace" className="px-3.5 py-2 rounded-full text-muted hover:text-ink hover:bg-white/[0.07]">Airspace</a>
-            <a href="#events" className="px-3.5 py-2 rounded-full text-muted hover:text-ink hover:bg-white/[0.07]">Events</a>
-            <a href="#join" className="px-3.5 py-2 rounded-full text-muted hover:text-ink hover:bg-white/[0.07]">Join</a>
-            <a href="#" className="px-3.5 py-2 rounded-full text-muted hover:text-ink hover:bg-white/[0.07]">Pilots</a>
-            </nav>
-            <a href="#join" className="flex items-center gap-2 px-6 py-3 bg-gold hover:bg-goldLight text-navy font-bold text-[14.5px] rounded-full">
-            Get started
-            </a>
-        </header>
+        <Navbar />
 
         {/* Hero */}
         <section className="relative px-10 pt-20 pb-24 overflow-hidden">
@@ -152,28 +142,7 @@
         </section>
 
         {/* Footer */}
-        <footer className="px-10 pt-14 pb-11 border-t border-white/[0.14]">
-            <div className="max-w-[1180px] mx-auto flex gap-8 flex-wrap items-start">
-            <div className="max-w-[38ch]">
-                <div className="flex items-center gap-3">
-                <img src="/logo-no-text.png" alt="" className="w-9 h-9" />
-                <span className="font-extrabold text-[15px] tracking-tight">Anchorage ARTCC</span>
-                </div>
-                <p className="mt-4 text-[13.5px] text-muted3 leading-relaxed">
-                A volunteer facility on the VATSIM network. Not affiliated with the FAA. Not for real-world navigation.
-                </p>
-            </div>
-            <div className="flex gap-6 flex-wrap ml-auto text-sm font-semibold">
-                <a href="/roster" className="text-muted2 hover:text-ink">Roster</a>
-                <a href="#" className="text-muted2 hover:text-ink">Charts</a>
-                <a href="#" className="text-muted2 hover:text-ink">Discord</a>
-                <a href="#" className="text-muted2 hover:text-ink">VATUSA</a>
-            </div>
-            </div>
-            <div className="max-w-[1180px] mx-auto mt-9 text-xs font-semibold text-[#4E5A7A]">
-            © 2026 Anchorage ARTCC
-            </div>
-        </footer>
+          <Footer />
         </div>
     )
     }
