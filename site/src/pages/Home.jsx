@@ -3,18 +3,19 @@ import { Link } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { useAuth } from '../context/AuthContext'
+import { API_URL } from '../config'
 
 function Home() {
   const { user } = useAuth()
   const [events, setEvents] = useState([])
   const firstName = user?.name?.split(' ')[0]
 
-  useEffect(() => {
-    fetch('http://localhost:4000/api/events', { credentials: 'include' })
-      .then((res) => res.json())
-      .then((data) => setEvents(data.slice(0, 2)))
-      .catch(() => setEvents([]))
-  }, [user])
+useEffect(() => {
+  fetch(`${API_URL}/api/events`, { credentials: 'include' })
+    .then((res) => res.json())
+    .then((data) => setEvents(data.slice(0, 2)))
+    .catch(() => setEvents([]))
+}, [user])
 
   return (
     <div className="bg-navy text-ink font-mulish">
@@ -22,30 +23,6 @@ function Home() {
       <Navbar />
 
       {/* Welcome banner - only shown when logged in */}
-      {user && (
-        <section className="px-10 pt-16 pb-10">
-          <div className="max-w-[1180px] mx-auto">
-            <div className="rounded-3xl bg-gradient-to-br from-gold/15 via-purple/10 to-transparent border border-white/10 px-10 py-12">
-              <p className="text-sm font-bold text-gold uppercase tracking-widest mb-2">Welcome back</p>
-              <h2 className="text-5xl font-extrabold tracking-tight">{firstName}</h2>
-              {user.zanRole && (
-                <p className="mt-3 text-muted2">
-                  You hold the <span className="text-teal font-semibold">{user.zanRole}</span> role at ZAN.
-                </p>
-              )}
-              {!user.zanRole && user.isZanVisitor && (
-                <p className="mt-3 text-muted2">You're a visiting controller at ZAN.</p>
-              )}
-              {!user.zanRole && !user.isZanVisitor && (
-                <p className="mt-3 text-muted2">
-                  Not yet visiting ZAN —{' '}
-                  <Link to="/apply" className="text-gold font-semibold hover:underline">apply to visit</Link>.
-                </p>
-              )}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* Hero */}
       <section className="relative px-10 pt-20 pb-24 overflow-hidden">

@@ -3,6 +3,7 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { useAuth } from '../context/AuthContext'
 import { Link } from 'react-router-dom'
+import { API_URL } from '../config'
 
 function StaffDashboard() {
   const { user } = useAuth()
@@ -11,10 +12,10 @@ function StaffDashboard() {
 
   const load = () => {
     if (!user) return
-    fetch('http://localhost:4000/api/feedback', { credentials: 'include' })
+    fetch(`${API_URL}/api/feedback`, { credentials: 'include' })
       .then((res) => res.json())
       .then(setFeedback)
-    fetch('http://localhost:4000/api/apply/pending', { credentials: 'include' })
+    fetch(`${API_URL}/api/apply/pending`, { credentials: 'include' })
       .then((res) => res.json())
       .then(setApplications)
   }
@@ -22,7 +23,7 @@ function StaffDashboard() {
   useEffect(load, [user])
 
   const reviewFeedback = async (id) => {
-    await fetch(`http://localhost:4000/api/feedback/${id}/reviewed`, {
+    await fetch(`${API_URL}/api/feedback/${id}/reviewed`, {
       method: 'PUT',
       credentials: 'include',
     })
@@ -30,7 +31,7 @@ function StaffDashboard() {
   }
 
   const decideApplication = async (id, status) => {
-    await fetch(`http://localhost:4000/api/apply/${id}/status`, {
+    await fetch(`${API_URL}/api/apply/${id}/status`, {
       method: 'PUT',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },

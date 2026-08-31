@@ -4,6 +4,7 @@ import RosterTabs from '../components/RosterTabs'
 import RosterTable from '../components/RosterTable'
 import { useRoster } from '../hooks/useRoster'
 
+
 function RosterVisiting() {
   const { roster, loading, error, refetch } = useRoster()
   const visitingMembers = roster.filter((m) => m.membership === 'visit')

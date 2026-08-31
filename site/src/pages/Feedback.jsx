@@ -3,6 +3,7 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { useAuth } from '../context/AuthContext'
 import { useRoster } from '../hooks/useRoster'
+import { API_URL } from '../config'
 
 function Feedback() {
   const { user, loginWithVatsim } = useAuth()
@@ -19,7 +20,7 @@ function Feedback() {
 
   useEffect(() => {
     if (tab === 'mine' && user) {
-      fetch('http://localhost:4000/api/feedback/mine', { credentials: 'include' })
+      fetch(`${API_URL}/api/feedback/mine`, { credentials: 'include' })
         .then((res) => res.json())
         .then(setMyFeedback)
     }
@@ -28,7 +29,7 @@ function Feedback() {
   const activeControllers = roster.filter((m) => m.membership === 'home' || m.membership === 'visit')
 
   const submitFeedback = async () => {
-    const response = await fetch('http://localhost:4000/api/feedback', {
+    const response = await fetch(`${API_URL}/api/feedback`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },

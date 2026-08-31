@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { useAuth } from '../context/AuthContext'
 import { hasMinimumRole } from '../utils/roles'
+import { API_URL } from '../config'
 
 const CATEGORIES = ['Enroute', 'TRACON', 'Local']
 
@@ -21,7 +22,7 @@ function EventDetail() {
   const isStaff = hasMinimumRole(user?.zanRole, 'EC')
 
   const load = () => {
-    fetch(`http://localhost:4000/api/events/${id}`, { credentials: 'include' })
+    fetch(`${API_URL}/api/events/${id}`, { credentials: 'include' })
       .then((res) => {
         if (!res.ok) throw new Error('not found')
         return res.json()
@@ -35,11 +36,11 @@ function EventDetail() {
         setLoading(false)
       })
 
-    fetch(`http://localhost:4000/api/events/${id}/positions`, { credentials: 'include' })
+    fetch(`${API_URL}/api/events/${id}/positions`, { credentials: 'include' })
       .then((res) => res.json())
       .then(setPositions)
 
-    fetch(`http://localhost:4000/api/events/${id}/signups`, { credentials: 'include' })
+    fetch(`${API_URL}/api/events/${id}/signups`, { credentials: 'include' })
       .then((res) => res.json())
       .then(setSignups)
   }
@@ -47,7 +48,7 @@ function EventDetail() {
   useEffect(load, [id, user])
 
   const toggleVisibility = async () => {
-    await fetch(`http://localhost:4000/api/events/${id}/visibility`, {
+    await fetch(`${API_URL}/api/events/${id}/visibility`, {
       method: 'PUT',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -58,7 +59,7 @@ function EventDetail() {
 
   const addPosition = async () => {
     if (!newPosition.trim()) return
-    await fetch(`http://localhost:4000/api/events/${id}/positions`, {
+    await fetch(`${API_URL}/api/events/${id}/positions`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -69,7 +70,7 @@ function EventDetail() {
   }
 
   const removePosition = async (posId) => {
-    await fetch(`http://localhost:4000/api/events/${id}/positions/${posId}`, {
+    await fetch(`${API_URL}/api/events/${id}/positions/${posId}`, {
       method: 'DELETE',
       credentials: 'include',
     })
@@ -77,7 +78,7 @@ function EventDetail() {
   }
 
   const signUp = async (posId) => {
-    await fetch(`http://localhost:4000/api/events/${id}/positions/${posId}/signup`, {
+    await fetch(`${API_URL}/api/events/${id}/positions/${posId}/signup`, {
       method: 'POST',
       credentials: 'include',
     })
@@ -85,7 +86,7 @@ function EventDetail() {
   }
 
   const approveSignup = async (signupId) => {
-    await fetch(`http://localhost:4000/api/events/signups/${signupId}/approve`, {
+    await fetch(`${API_URL}/api/events/signups/${signupId}/approve`, {
       method: 'PUT',
       credentials: 'include',
     })
@@ -93,7 +94,7 @@ function EventDetail() {
   }
 
   const denySignup = async (signupId) => {
-    await fetch(`http://localhost:4000/api/events/signups/${signupId}`, {
+    await fetch(`${API_URL}/api/events/signups/${signupId}`, {
       method: 'DELETE',
       credentials: 'include',
     })

@@ -4,6 +4,7 @@ import Footer from '../components/Footer'
 import { useAuth } from '../context/AuthContext'
 import { useRoster } from '../hooks/useRoster'
 import { hasMinimumRole, ALL_ROLES } from '../utils/roles'
+import { API_URL } from '../config'
 import { useState, useEffect } from 'react'
 
 const POSITIONS = ['Unrestricted', 'Enroute', 'Oceanic']
@@ -28,7 +29,7 @@ function RosterMember() {
 
   useEffect(() => {
     if (tab === 'feedback' && member && isSeniorStaff) {
-      fetch(`http://localhost:4000/api/feedback/controller/${member.cid}`, {
+      fetch(`${API_URL}/api/feedback/controller/${member.cid}`, {
         credentials: 'include',
       })
         .then((res) => res.json())
@@ -39,7 +40,7 @@ function RosterMember() {
   const toggleEndorsement = async (position) => {
     if (!member) return
     const hasIt = member.endorsements.includes(position)
-    await fetch('http://localhost:4000/api/roster/endorsements', {
+    await fetch(`${API_URL}/api/roster/endorsements`, {
       method: hasIt ? 'DELETE' : 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -50,7 +51,7 @@ function RosterMember() {
 
   const saveInitials = async () => {
     setInitialsError(null)
-    const response = await fetch('http://localhost:4000/api/roster/initials', {
+    const response = await fetch(`${API_URL}/api/roster/initials`, {
       method: 'PUT',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -70,7 +71,7 @@ function RosterMember() {
     const cleaned = newRole.trim().toUpperCase()
     if (!cleaned) return
 
-    const response = await fetch('http://localhost:4000/api/roster/roles', {
+    const response = await fetch(`${API_URL}/api/roster/roles`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -86,7 +87,7 @@ function RosterMember() {
   }
 
   const removeMemberRole = async (role) => {
-    await fetch('http://localhost:4000/api/roster/roles', {
+    await fetch(`${API_URL}/api/roster/roles`, {
       method: 'DELETE',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },

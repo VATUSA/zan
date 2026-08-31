@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { useAuth } from '../context/AuthContext'
+import { API_URL } from '../config'
 
 function Events() {
   const { user } = useAuth()
@@ -11,7 +12,7 @@ function Events() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    fetch('http://localhost:4000/api/events', { credentials: 'include' })
+    fetch(`${API_URL}/api/events`, { credentials: 'include' })
       .then((res) => res.json())
       .then((data) => {
         setEvents(data)

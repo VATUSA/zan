@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { useAuth } from '../context/AuthContext'
+import { API_URL } from '../config'
 
 function ApplyToVisit() {
   const { user } = useAuth()
@@ -14,7 +15,7 @@ function ApplyToVisit() {
 
   useEffect(() => {
     if (!user) return
-    fetch(`http://localhost:4000/api/apply/eligibility/${user.cid}`)
+    fetch(`${API_URL}/api/apply/eligibility/${user.cid}`, { credentials: 'include' })
       .then((res) => {
         if (!res.ok) throw new Error('Eligibility check failed')
         return res.json()
@@ -46,23 +47,24 @@ function ApplyToVisit() {
     ?.every((item) => item.passed) ?? false
 
   const submitApplication = async () => {
-  setSubmitting(true)
-  await fetch('http://localhost:4000/api/apply/submit', {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      fname: eligibility.fname,
-      lname: eligibility.lname,
-      email: eligibility.email,
-      facility: eligibility.facility,
-      rating: eligibility.rating,
-      reason,
-    }),
-  })
-  setSubmitting(false)
-  setSubmitted(true)
-}
+    setSubmitting(true)
+    await fetch(`${API_URL}/api/apply/submit`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fname: eligibility.fname,
+        lname: eligibility.lname,
+        email: eligibility.email,
+        facility: eligibility.facility,
+        rating: eligibility.rating,
+        reason,
+      }),
+    })
+    setSubmitting(false)
+    setSubmitted(true)
+  }
+
   return (
     <div className="min-h-screen bg-navy text-ink font-mulish">
       <Navbar />

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { API_URL } from '../config'
 
 export function useFiles() {
   const [files, setFiles] = useState([])
@@ -7,7 +8,7 @@ export function useFiles() {
 
   const fetchFiles = useCallback(() => {
     setLoading(true)
-    fetch('http://localhost:4000/api/files', { credentials: 'include' })
+    fetch(`${API_URL}/api/files`, { credentials: 'include' })
       .then((res) => res.json())
       .then((data) => {
         setFiles(data)

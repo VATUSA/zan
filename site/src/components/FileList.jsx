@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { hasMinimumRole } from '../utils/roles'
+import { API_URL } from '../config'
 
 function FileList({ category, files, loading, onChange }) {
   const { user } = useAuth()
@@ -25,7 +26,7 @@ function FileList({ category, files, loading, onChange }) {
     formData.append('title', title.trim())
     formData.append('category', category)
 
-    const response = await fetch('http://localhost:4000/api/files', {
+    const response = await fetch(`${API_URL}/api/files`, {
       method: 'POST',
       credentials: 'include',
       body: formData,
@@ -46,7 +47,7 @@ function FileList({ category, files, loading, onChange }) {
   }
 
   const deleteFile = async (id) => {
-    await fetch(`http://localhost:4000/api/files/${id}`, {
+    await fetch(`${API_URL}/api/files/${id}`, {
       method: 'DELETE',
       credentials: 'include',
     })
@@ -106,8 +107,8 @@ function FileList({ category, files, loading, onChange }) {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <a
-                  href={`http://localhost:4000/api/files/${f.id}/download`}
+                
+                <a  href={`${API_URL}/api/files/${f.id}/download`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-4 py-1.5 rounded-lg bg-gold/15 text-gold hover:bg-gold/25 text-sm font-bold"

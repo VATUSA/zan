@@ -1,19 +1,17 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import { API_URL } from '../config'
 
 const AuthContext = createContext(null)
 
 const VATSIM_AUTH_URL = 'https://auth-dev.vatsim.net/oauth/authorize'
 const CLIENT_ID = import.meta.env.VITE_VATSIM_CLIENT_ID
 const REDIRECT_URI = 'http://localhost:5173/'
-const BACKEND_URL = 'http://localhost:4000'
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true) // true until we've checked for an existing session
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  // On first load: check if a code just came back from VATSIM, OR
-  // check if we already have a valid session cookie from a previous visit
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const code = params.get('code')
@@ -28,15 +26,15 @@ export function AuthProvider({ children }) {
 
   const checkExistingSession = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/auth/me`, {
-        credentials: 'include', // send cookies with this request
+      const response = await fetch(`${API_URL}/api/auth/me`, {
+        credentials: 'include',
       })
       if (response.ok) {
         const data = await response.json()
         setUser(data)
       }
     } catch (err) {
-      // no valid session, that's fine - just stay logged out
+      // no valid session, stay logged out
     } finally {
       setLoading(false)
     }
@@ -46,7 +44,7 @@ export function AuthProvider({ children }) {
     setLoading(true)
     setError(null)
     try {
-      const response = await fetch(`${BACKEND_URL}/api/auth/callback`, {
+      const response = await fetch(`${API_URL}/api/auth/callback`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -81,7 +79,7 @@ export function AuthProvider({ children }) {
     setLoading(true)
     setError(null)
     try {
-      const response = await fetch(`${BACKEND_URL}/api/auth/dev-login/${cid}`, {
+      const response = await fetch(`${API_URL}/api/auth/dev-login/${cid}`, {
         credentials: 'include',
       })
       const data = await response.json()
@@ -99,7 +97,7 @@ export function AuthProvider({ children }) {
   }
 
   const logout = async () => {
-    await fetch(`${BACKEND_URL}/api/auth/logout`, {
+    await fetch(`${API_URL}/api/auth/logout`, {
       method: 'POST',
       credentials: 'include',
     })
