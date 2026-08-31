@@ -2,7 +2,6 @@ import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import dotenv from 'dotenv'
-import filesRoutes from './routes/files.js'
 
 dotenv.config()
 
@@ -11,6 +10,7 @@ import rosterRoutes from './routes/roster.js'
 import applyRoutes from './routes/apply.js'
 import feedbackRoutes from './routes/feedback.js'
 import eventsRoutes from './routes/events.js'
+import filesRoutes from './routes/files.js'
 import { seedInitialRoles } from './db.js'
 import { attachUser } from './middleware/auth.js'
 
@@ -21,7 +21,7 @@ const app = express()
 const PORT = 4000
 
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: process.env.FRONTEND_URL,
   credentials: true,
 }))
 app.use(cookieParser())
@@ -38,6 +38,7 @@ app.use('/api/apply', applyRoutes)
 app.use('/api/feedback', feedbackRoutes)
 app.use('/api/events', eventsRoutes)
 app.use('/api/files', filesRoutes)
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`)
 })

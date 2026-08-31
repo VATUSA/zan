@@ -26,7 +26,7 @@ async function fetchZanEvents() {
   const data = await response.json()
   if (!response.ok) throw new Error('Failed to fetch events from VATUSA')
 
-  const zanEvents = data.filter((e) => e.facility === 'ZSE') // TEMP: testing, revert to 'ZAN' before going live
+  const zanEvents = data.filter((e) => e.facility === 'ZAN') // TEMP: testing, revert to 'ZAN' before going live
   cachedEvents = zanEvents
   cacheTime = now
   return zanEvents

@@ -8,7 +8,7 @@ const router = express.Router()
 const COOKIE_OPTIONS = {
   httpOnly: true,       // JavaScript in the browser can't read or touch this cookie at all
   sameSite: 'lax',      // sent on normal navigation, blocks most cross-site abuse
-  secure: false,         // TEMP: false for local http dev. Must be true once deployed over https
+  secure: process.env.NODE_ENV === 'production', // false locally over http, true once deployed over https
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days, in milliseconds
 }
 
@@ -85,8 +85,12 @@ router.post('/callback', async (req, res) => {
   }
 })
 
-// dev only must remove
+// dev only - disabled automatically outside development
 router.get('/dev-login/:cid', async (req, res) => {
+  if (process.env.NODE_ENV !== 'development') {
+    return res.status(404).json({ error: 'Not found' })
+  }
+
   const { cid } = req.params
 
   try {
@@ -123,8 +127,6 @@ router.get('/dev-login/:cid', async (req, res) => {
   }
 })
 
-// Ask "who am I?" based on the session cookie. This is what makes login
-// survive a page refresh - the frontend calls this on every page load.
 router.get('/me', (req, res) => {
   const token = req.cookies.session
   if (!token) {
@@ -136,8 +138,6 @@ router.get('/me', (req, res) => {
     return res.status(401).json({ error: 'Invalid or expired session' })
   }
 
-  // Re-derive current role/visitor status fresh, rather than trusting
-  // whatever was true at login time - roles can change since then
   const zanRole = getHighestRole(getRoles(session.cid))
 
   res.json({ cid: session.cid, name: session.name, zanRole })
@@ -147,8 +147,5 @@ router.post('/logout', (req, res) => {
   res.clearCookie('session', COOKIE_OPTIONS)
   res.json({ success: true })
 })
-
-const SECRET = process.env.SESSION_SECRET
-console.log('SESSION_SECRET loaded:', SECRET ? 'yes' : 'NO - undefined')
 
 export default router
