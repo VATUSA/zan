@@ -1,6 +1,16 @@
 import express from 'express'
+import { getRoles } from '../db.js'
+import { getHighestRole } from '../utils/roles.js'
+import { createSessionToken, verifySessionToken } from '../utils/session.js'
 
 const router = express.Router()
+
+const COOKIE_OPTIONS = {
+  httpOnly: true,       // JavaScript in the browser can't read or touch this cookie at all
+  sameSite: 'lax',      // sent on normal navigation, blocks most cross-site abuse
+  secure: false,         // TEMP: false for local http dev. Must be true once deployed over https
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days, in milliseconds
+}
 
 router.post('/callback', async (req, res) => {
   const { code } = req.body
@@ -49,13 +59,13 @@ router.post('/callback', async (req, res) => {
     let isZanVisitor = false
 
     if (vatusaResponse.ok && vatusaData.data) {
-      zanRole = vatusaData.data.roles?.find((r) => r.facility === 'ZAN')?.role ?? null
+      zanRole = getHighestRole(getRoles(cid))
       isZanVisitor = vatusaData.data.visits?.some((v) => v.facility === 'ZAN') ?? false
     } else {
       console.error('VATUSA lookup failed:', vatusaData)
     }
 
-    res.json({
+    const user = {
       cid,
       name: userData.data.personal.name_full,
       email: userData.data.personal.email,
@@ -63,11 +73,82 @@ router.post('/callback', async (req, res) => {
       division: userData.data.vatsim.division.name,
       zanRole,
       isZanVisitor,
-    })
+    }
+
+    const sessionToken = createSessionToken(user)
+    res.cookie('session', sessionToken, COOKIE_OPTIONS)
+
+    res.json(user)
   } catch (err) {
     console.error('Server error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
+
+// dev only must remove
+router.get('/dev-login/:cid', async (req, res) => {
+  const { cid } = req.params
+
+  try {
+    const vatusaResponse = await fetch(
+      `https://api.vatusa.net/v2/user/${cid}?apikey=${process.env.VATUSA_API_KEY}`
+    )
+    const vatusaData = await vatusaResponse.json()
+
+    if (!vatusaResponse.ok || !vatusaData.data) {
+      return res.status(400).json({ error: 'Could not find that CID in VATUSA' })
+    }
+
+    const vatusaUser = vatusaData.data
+    const zanRole = getHighestRole(getRoles(cid))
+    const isZanVisitor = vatusaUser.visits?.some((v) => v.facility === 'ZAN') ?? false
+
+    const user = {
+      cid: vatusaUser.cid,
+      name: `${vatusaUser.fname} ${vatusaUser.lname}`,
+      email: vatusaUser.email,
+      rating: vatusaUser.rating_short,
+      division: vatusaUser.facility,
+      zanRole,
+      isZanVisitor,
+    }
+
+    const sessionToken = createSessionToken(user)
+    res.cookie('session', sessionToken, COOKIE_OPTIONS)
+
+    res.json(user)
+  } catch (err) {
+    console.error('Dev login error:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+// Ask "who am I?" based on the session cookie. This is what makes login
+// survive a page refresh - the frontend calls this on every page load.
+router.get('/me', (req, res) => {
+  const token = req.cookies.session
+  if (!token) {
+    return res.status(401).json({ error: 'Not logged in' })
+  }
+
+  const session = verifySessionToken(token)
+  if (!session) {
+    return res.status(401).json({ error: 'Invalid or expired session' })
+  }
+
+  // Re-derive current role/visitor status fresh, rather than trusting
+  // whatever was true at login time - roles can change since then
+  const zanRole = getHighestRole(getRoles(session.cid))
+
+  res.json({ cid: session.cid, name: session.name, zanRole })
+})
+
+router.post('/logout', (req, res) => {
+  res.clearCookie('session', COOKIE_OPTIONS)
+  res.json({ success: true })
+})
+
+const SECRET = process.env.SESSION_SECRET
+console.log('SESSION_SECRET loaded:', SECRET ? 'yes' : 'NO - undefined')
 
 export default router

@@ -1,4 +1,6 @@
 import express from 'express'
+import { submitApplication, getPendingApplications, updateApplicationStatus } from '../db.js'
+import { requireRole } from '../middleware/auth.js'
 
 const router = express.Router()
 
@@ -23,7 +25,7 @@ router.get('/eligibility/:cid', async (req, res) => {
     }
 
     const hasHomeFacility = !!user.facility
-    const ratingAtLeastS3 = user.rating >= 4 // S3 is rating id 4 in VATSIM's scale
+    const ratingAtLeastS3 = user.rating >= 4
     const daysSincePromotion = daysSince(user.last_promotion)
     const meetsPromotionWindow = daysSincePromotion !== null && daysSincePromotion >= 90
     const alreadyVisitingZan = user.visits?.some((v) => v.facility === 'ZAN') ?? false
@@ -40,14 +42,40 @@ router.get('/eligibility/:cid', async (req, res) => {
         { label: 'Holds at least an S3 rating', passed: ratingAtLeastS3 },
         { label: 'At least 90 days since last promotion', passed: meetsPromotionWindow },
         { label: 'Not already visiting ZAN', passed: !alreadyVisitingZan },
-        { label: 'Controlled 50 hours since promotion', passed: null }, // can't verify yet
-        { label: 'No pending visiting applications', passed: null }, // can't verify yet
+        { label: 'Controlled 50 hours since promotion', passed: null },
+        { label: 'No pending visiting applications', passed: null },
       ],
     })
   } catch (err) {
     console.error('Eligibility check error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
+})
+
+// Must be logged in to submit a real application
+router.post('/submit', (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Must be logged in to apply' })
+  }
+
+  const { fname, lname, email, facility, rating, reason } = req.body
+  if (!fname || !lname) {
+    return res.status(400).json({ error: 'Missing required fields' })
+  }
+  submitApplication({ cid: req.user.cid, fname, lname, email, facility, rating, reason })
+  res.json({ success: true })
+})
+
+// Staff only - list of pending applications, for the staff dashboard
+router.get('/pending', requireRole('TA'), (req, res) => {
+  res.json(getPendingApplications())
+})
+
+// Staff only - approve/deny an application
+router.put('/:id/status', requireRole('TA'), (req, res) => {
+  const { status } = req.body
+  updateApplicationStatus(req.params.id, status)
+  res.json({ success: true })
 })
 
 export default router

@@ -1,2 +1,5 @@
 node_modules
 .env
+zan.db
+uploads/*
+!uploads/.gitkeep

@@ -1,23 +1,23 @@
 import express from 'express'
+import {
+  getAllEndorsements, addEndorsement, removeEndorsement,
+  getAllInitials, assignInitialsIfNeeded, seedRealInitials, setInitials, getInitials,
+  getAllRoles, addRole, removeRole,
+} from '../db.js'
+import { getHighestRole } from '../utils/roles.js'
+import { requireRole } from '../middleware/auth.js'
 
 const router = express.Router()
 
 let cachedRoster = null
 let cacheTime = 0
-const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes, in milliseconds
-
-// TEMP: fake endorsement data, keyed by CID.
-// TODO: replace with real database lookups once we add SQLite.
-const MOCK_ENDORSEMENTS = {
-  1599990: ['Unrestricted', 'Enroute'],
-  1394476: ['Unrestricted', 'Enroute', 'Oceanic'],
-  1677974: ['Unrestricted'],
-}
+const CACHE_DURATION = 5 * 60 * 1000
 
 router.get('/', async (req, res) => {
+  res.set('Cache-Control', 'no-store')
+
   const now = Date.now()
 
-  // If we have cached data and it's still fresh, use it instead of calling VATUSA again
   if (cachedRoster && now - cacheTime < CACHE_DURATION) {
     return res.json(cachedRoster)
   }
@@ -32,17 +32,32 @@ router.get('/', async (req, res) => {
       return res.status(400).json({ error: 'Failed to fetch roster', details: data })
     }
 
+    const allEndorsements = getAllEndorsements()
+    const allRoles = getAllRoles()
+
+    data.data.forEach((member) => {
+      // Only seed initials the FIRST time we ever see this person -
+      // never overwrite initials that already exist (e.g. from a staff edit)
+      if (!getInitials(member.cid)) {
+        const wasSeeded = seedRealInitials(member.cid, member.fname, member.lname)
+        if (!wasSeeded) {
+          assignInitialsIfNeeded(member.cid, member.fname, member.lname)
+        }
+      }
+    })
+    const allInitials = getAllInitials()
+
     const roster = data.data.map((member) => ({
       cid: member.cid,
       fname: member.fname,
       lname: member.lname,
       rating: member.rating_short,
-      role: member.roles?.find((r) => r.facility === 'ZAN')?.role ?? null,
+      role: getHighestRole(allRoles[member.cid]) ?? null,
       membership: member.membership,
-      endorsements: MOCK_ENDORSEMENTS[member.cid] || [], // TODO: real DB lookup later
+      endorsements: allEndorsements[member.cid] || [],
+      initials: allInitials[member.cid] || '??',
     }))
 
-    // Save this result so the next request can reuse it
     cachedRoster = roster
     cacheTime = now
 
@@ -51,6 +66,72 @@ router.get('/', async (req, res) => {
     console.error('Roster fetch error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
+})
+
+// Grant an endorsement - staff only (INS+), enforced by requireRole before this ever runs
+router.post('/endorsements', requireRole('INS'), (req, res) => {
+  const { cid, position } = req.body
+  if (!cid || !position) {
+    return res.status(400).json({ error: 'Missing required fields' })
+  }
+  addEndorsement(cid, position, req.user.cid)
+  cachedRoster = null
+  res.json({ success: true })
+})
+
+// Revoke an endorsement - staff only (INS+)
+router.delete('/endorsements', requireRole('INS'), (req, res) => {
+  const { cid, position } = req.body
+  if (!cid || !position) {
+    return res.status(400).json({ error: 'Missing required fields' })
+  }
+  removeEndorsement(cid, position)
+  cachedRoster = null
+  res.json({ success: true })
+})
+
+// Update someone's operating initials - staff only (INS+)
+router.put('/initials', requireRole('INS'), (req, res) => {
+  const { cid, initials } = req.body
+
+  if (!cid || !initials) {
+    return res.status(400).json({ error: 'Missing required fields' })
+  }
+
+  const cleaned = initials.trim().toUpperCase()
+  if (!/^[A-Z]{2}$/.test(cleaned)) {
+    return res.status(400).json({ error: 'Initials must be exactly 2 letters' })
+  }
+
+  const result = setInitials(cid, cleaned)
+  if (!result.success) {
+    return res.status(409).json(result)
+  }
+
+  cachedRoster = null
+  res.json({ success: true })
+})
+
+// Assign a role - DATM+ only
+router.post('/roles', requireRole('DATM'), (req, res) => {
+  const { cid, role } = req.body
+  if (!cid || !role) {
+    return res.status(400).json({ error: 'Missing required fields' })
+  }
+  addRole(cid, role)
+  cachedRoster = null
+  res.json({ success: true })
+})
+
+// Remove a role - DATM+ only
+router.delete('/roles', requireRole('DATM'), (req, res) => {
+  const { cid, role } = req.body
+  if (!cid || !role) {
+    return res.status(400).json({ error: 'Missing required fields' })
+  }
+  removeRole(cid, role)
+  cachedRoster = null
+  res.json({ success: true })
 })
 
 export default router
