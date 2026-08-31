@@ -5,7 +5,7 @@ import RosterTable from '../components/RosterTable'
 import { useRoster } from '../hooks/useRoster'
 
 function RosterVisiting() {
-  const { roster, loading, error } = useRoster()
+  const { roster, loading, error, refetch } = useRoster()
   const visitingMembers = roster.filter((m) => m.membership === 'visit')
 
   return (
@@ -19,7 +19,7 @@ function RosterVisiting() {
 
         {loading && <p className="text-muted2">Loading roster...</p>}
         {error && <p className="text-red-400">{error}</p>}
-        {!loading && !error && <RosterTable members={visitingMembers} />}
+        {!loading && !error && <RosterTable members={visitingMembers} onChange={refetch} />}
       </div>
       <Footer />
     </div>

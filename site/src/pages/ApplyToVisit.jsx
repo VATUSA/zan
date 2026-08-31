@@ -9,20 +9,22 @@ function ApplyToVisit() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [reason, setReason] = useState('')
+  const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     if (!user) return
-    fetch(`http://localhost:4000/api/apply/eligibility/1599990`)
+    fetch(`http://localhost:4000/api/apply/eligibility/${user.cid}`)
       .then((res) => {
-      if (!res.ok) throw new Error('Eligibility check failed')
-      return res.json()
-    })
+        if (!res.ok) throw new Error('Eligibility check failed')
+        return res.json()
+      })
       .then((data) => {
         setEligibility(data)
         setLoading(false)
       })
       .catch(() => {
-        setError('Could not check eligibility')
+        setError('Could not check eligibility — this CID may not exist in VATUSA\'s system.')
         setLoading(false)
       })
   }, [user])
@@ -43,6 +45,24 @@ function ApplyToVisit() {
     ?.filter((item) => item.passed !== null)
     ?.every((item) => item.passed) ?? false
 
+  const submitApplication = async () => {
+  setSubmitting(true)
+  await fetch('http://localhost:4000/api/apply/submit', {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      fname: eligibility.fname,
+      lname: eligibility.lname,
+      email: eligibility.email,
+      facility: eligibility.facility,
+      rating: eligibility.rating,
+      reason,
+    }),
+  })
+  setSubmitting(false)
+  setSubmitted(true)
+}
   return (
     <div className="min-h-screen bg-navy text-ink font-mulish">
       <Navbar />
@@ -96,16 +116,23 @@ function ApplyToVisit() {
               />
             </label>
 
-            <button
-              disabled={!allRequiredPassed}
-              className="px-7 py-3.5 rounded-full bg-gold hover:bg-goldLight disabled:bg-white/10 disabled:text-muted3 disabled:cursor-not-allowed text-navy font-bold text-[15px]"
-            >
-              Submit Application
-            </button>
-            {!allRequiredPassed && (
-              <p className="text-sm text-red-400 mt-3">
-                You don't currently meet all requirements to apply.
-              </p>
+            {submitted ? (
+              <p className="text-teal font-semibold">✓ Application submitted. Staff will review it soon.</p>
+            ) : (
+              <>
+                <button
+                  onClick={submitApplication}
+                  disabled={!allRequiredPassed || submitting}
+                  className="px-7 py-3.5 rounded-full bg-gold hover:bg-goldLight disabled:bg-white/10 disabled:text-muted3 disabled:cursor-not-allowed text-navy font-bold text-[15px]"
+                >
+                  {submitting ? 'Submitting...' : 'Submit Application'}
+                </button>
+                {!allRequiredPassed && (
+                  <p className="text-sm text-red-400 mt-3">
+                    You don't currently meet all requirements to apply.
+                  </p>
+                )}
+              </>
             )}
           </>
         )}

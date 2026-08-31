@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 export function useRoster() {
   const [roster, setRoster] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  useEffect(() => {
+  const fetchRoster = useCallback(() => {
+    setLoading(true)
     fetch('http://localhost:4000/api/roster')
       .then((res) => res.json())
       .then((data) => {
@@ -18,5 +19,9 @@ export function useRoster() {
       })
   }, [])
 
-  return { roster, loading, error }
+  useEffect(() => {
+    fetchRoster()
+  }, [fetchRoster])
+
+  return { roster, loading, error, refetch: fetchRoster }
 }
