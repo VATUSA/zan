@@ -20,14 +20,14 @@ router.post('/callback', async (req, res) => {
   }
 
   try {
-    const tokenResponse = await fetch('https://auth-dev.vatsim.net/oauth/token', {
+    const tokenResponse = await fetch('https://auth.vatsim.net/oauth/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         grant_type: 'authorization_code',
         client_id: process.env.VATSIM_CLIENT_ID,
         client_secret: process.env.VATSIM_CLIENT_SECRET,
-        redirect_uri: 'http://localhost:5173/',
+        redirect_uri: process.env.FRONTEND_REDIRECT_URI,
         code,
       }),
     })
@@ -38,7 +38,7 @@ router.post('/callback', async (req, res) => {
       return res.status(400).json({ error: 'Token exchange failed', details: tokenData })
     }
 
-    const userResponse = await fetch('https://auth-dev.vatsim.net/api/user', {
+    const userResponse = await fetch('https://auth.vatsim.net/api/user', {
       headers: { Authorization: `Bearer ${tokenData.access_token}` },
     })
 

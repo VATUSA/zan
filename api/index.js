@@ -18,7 +18,7 @@ seedInitialRoles()
 console.log('Database connected, roles seeded.')
 
 const app = express()
-const PORT = 4000
+const PORT = process.env.PORT || 4000
 
 app.use(cors({
   origin: process.env.FRONTEND_URL,
@@ -40,5 +40,5 @@ app.use('/api/events', eventsRoutes)
 app.use('/api/files', filesRoutes)
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`)
+  console.log(`Server running on port ${PORT}`)
 })
