@@ -1,10 +1,20 @@
+import { useState, useEffect } from 'react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { useAuth } from '../context/AuthContext'
 import { Link } from 'react-router-dom'
+import { API_URL } from '../config'
 
 function Profile() {
   const { user } = useAuth()
+  const [myFeedback, setMyFeedback] = useState([])
+
+  useEffect(() => {
+    if (!user) return
+    fetch(`${API_URL}/api/feedback/about-me`, { credentials: 'include' })
+      .then((res) => res.json())
+      .then(setMyFeedback)
+  }, [user])
 
   if (!user) {
     return (
@@ -37,7 +47,7 @@ function Profile() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <ProfileField label="Rating" value={user.rating} />
             <ProfileField label="Division" value={user.division} />
             <ProfileField label="Email" value={user.email} />
@@ -46,10 +56,9 @@ function Profile() {
           </div>
         </div>
 
-        {/* TEMP: static placeholders — hours, training notes, feedback all need
-            real data sources later (VATSIM connect-time stats, an instructor
-            notes table, a feedback table). Revisit once we add the database. */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        {/* TEMP: Hours and Training Notes still need real data sources
+            (VATSIM connect-time stats, an instructor notes table). */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
           <div className="rounded-2xl bg-white/[0.04] p-6">
             <div className="text-xs font-semibold text-muted2 uppercase tracking-wide mb-2">Hours this quarter</div>
             <div className="text-3xl font-extrabold text-gold">—</div>
@@ -59,9 +68,24 @@ function Profile() {
             <div className="text-xs font-semibold text-muted2 uppercase tracking-wide mb-2">Training notes</div>
             <div className="text-sm text-muted3 mt-1">None yet</div>
           </div>
-          <div className="rounded-2xl bg-white/[0.04] p-6">
-            <div className="text-xs font-semibold text-muted2 uppercase tracking-wide mb-2">Feedback</div>
-            <div className="text-sm text-muted3 mt-1">None yet</div>
+        </div>
+
+        <div className="rounded-2xl bg-white/[0.04] p-6 mb-6">
+          <div className="text-xs font-semibold text-muted2 uppercase tracking-wide mb-3">Feedback about you</div>
+          {myFeedback.length === 0 && (
+            <p className="text-sm text-muted3">No reviewed feedback yet.</p>
+          )}
+          <div className="space-y-3">
+            {myFeedback.map((f) => (
+              <div key={f.id} className="rounded-xl bg-white/[0.03] border border-white/5 p-4">
+                <div className="flex justify-between text-sm">
+                  <span className="font-semibold text-gold">{f.rating}</span>
+                  <span className="text-muted3">{new Date(f.created_at).toLocaleDateString()}</span>
+                </div>
+                {f.position && <div className="text-sm text-muted2 mt-1">{f.position}</div>}
+                {f.comments && <p className="text-sm mt-2">{f.comments}</p>}
+              </div>
+            ))}
           </div>
         </div>
 
@@ -84,7 +108,7 @@ function ProfileField({ label, value }) {
   return (
     <div>
       <div className="text-xs font-semibold text-muted2 mb-1 uppercase tracking-wide">{label}</div>
-      <div className="rounded-xl bg-white/[0.04] border border-white/10 px-4 py-3 text-ink">
+      <div className="rounded-xl bg-white/[0.04] border border-white/10 px-4 py-3 text-ink truncate">
         {value}
       </div>
     </div>

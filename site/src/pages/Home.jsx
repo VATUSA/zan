@@ -10,19 +10,17 @@ function Home() {
   const [events, setEvents] = useState([])
   const firstName = user?.name?.split(' ')[0]
 
-useEffect(() => {
-  fetch(`${API_URL}/api/events`, { credentials: 'include' })
-    .then((res) => res.json())
-    .then((data) => setEvents(data.slice(0, 2)))
-    .catch(() => setEvents([]))
-}, [user])
+  useEffect(() => {
+    fetch(`${API_URL}/api/events`, { credentials: 'include' })
+      .then((res) => res.json())
+      .then((data) => setEvents(data.slice(0, 2)))
+      .catch(() => setEvents([]))
+  }, [user])
 
   return (
     <div className="bg-navy text-ink font-mulish">
       {/* Header */}
       <Navbar />
-
-      {/* Welcome banner - only shown when logged in */}
 
       {/* Hero */}
       <section className="relative px-10 pt-20 pb-24 overflow-hidden">
@@ -42,15 +40,109 @@ useEffect(() => {
           </p>
           <div className="flex gap-3 mt-10 flex-wrap">
             <Link to="/apply" className="flex items-center gap-2 px-7 py-4 bg-gold hover:bg-goldLight text-navy font-bold text-[15px] rounded-full">
-              Fly here tonight <span>→</span>
+              Control here tonight <span>→</span>
             </Link>
             <a href="#airspace" className="flex items-center gap-2 px-7 py-4 border border-white/30 hover:border-white hover:bg-white/[0.06] text-ink font-bold text-[15px] rounded-full">
-              See the airspace
+              Learn more
             </a>
           </div>
           <div className="flex items-center gap-3 flex-wrap mt-12 text-sm font-semibold text-muted2">
             <span className="w-1.5 h-1.5 rounded-full bg-teal" style={{ animation: 'livedot 2.4s ease-out infinite' }} />
             <span className="text-ink">4 controllers on frequency · 31 pilots in the FIR</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Division-wide announcement */}
+      <section className="px-10 pb-24">
+        <div className="max-w-[1180px] mx-auto">
+          <div className="rounded-3xl bg-gradient-to-br from-purple/10 via-transparent to-gold/10 border border-white/10 p-10 md:p-14">
+            <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-10">
+              <div>
+                <span className="inline-block px-3 py-1 rounded-full bg-gold/15 text-gold text-xs font-bold uppercase tracking-widest mb-6">
+                  Division-Wide Announcement
+                </span>
+
+                <h2 className="font-extrabold leading-tight tracking-tight text-[clamp(28px,3.2vw,42px)]">
+                  Any S3 controller in the division can fly and control here — starting now.
+                </h2>
+
+                <p className="max-w-[52ch] mt-5 text-muted leading-relaxed">
+                  VATUSA2 has granted every home controller rated S3 or above in the division inherent
+                  visiting privileges at Anchorage — no activity requirement, no visiting roster needed,
+                  unless you're going for a Tier 2 endorsement.
+                </p>
+
+                <details className="mt-8 group">
+                  <summary className="cursor-pointer list-none flex items-center gap-2 text-sm font-bold text-ink hover:text-gold">
+                    <span className="transition-transform group-open:rotate-90">▸</span>
+                    Read the full announcement from VATUSA2
+                  </summary>
+                  <div className="mt-5 pl-6 border-l-2 border-white/10 text-muted leading-relaxed space-y-4 text-sm">
+                    <p>
+                      We are proud to offer both our pilot and controller members memorable experiences
+                      across our 22 subdivisions. Each subdivision has its own culture, unique qualities,
+                      and challenges. In this letter, we are announcing a new opportunity for all our
+                      controlling members in the division who meet the applicable requirements.
+                    </p>
+                    <p>
+                      Anchorage ARTCC is home to the beautiful Alaskan wilderness, unforgiving terrain,
+                      and unique airports. With plenty of challenging IFR and VFR procedures throughout
+                      the massive airspace, pilots and controllers will never be bored and never run out
+                      of new experiences to seek! While this facility has historically not been a popular
+                      one for controllers and staff to select as their home controlling facility, it would
+                      be a shame to let such a fantastic subdivision remain underutilized.
+                    </p>
+                    <p>
+                      That is why, effective today, any VATUSA home controller rated S3 or above shall be
+                      granted inherent visiting controller privileges in the Anchorage subdivision with no
+                      activity requirement. To exercise these privileges, you must be in good standing and
+                      fully active on a VATUSA subdivision's home roster. You will not need to be listed on
+                      the ZAN visiting roster, unless you are seeking a Tier 2 endorsement. These details
+                      can be found in Section 2 of the ZAN ARTCC Administrative Manual.
+                    </p>
+                    <p>
+                      We hope that many of you will take advantage of this amazing opportunity to spread
+                      your wings and try something new on the network. This is a unique opportunity for our
+                      controllers to get together as an entire division and interact outside of the typical
+                      subdivision boundaries. Our pilots love it when we staff ZAN facilities and would
+                      certainly appreciate more controllers logging on and enjoying a fun session together!
+                    </p>
+                    <p>
+                      We will also seek to host events in ZAN in the future, allowing our members to get
+                      together and display the cumulative power of the division! If you have any questions,
+                      please feel free to reach out to Brandon Wening, VATUSA2, via{' '}
+                      <a href="mailto:vatusa2@vatusa.net" className="text-gold hover:underline">
+                        vatusa2@vatusa.net
+                      </a>
+                      . See you on the scopes!
+                    </p>
+                  </div>
+                </details>
+
+                <Link
+                  to="/apply"
+                  className="inline-flex items-center gap-2 mt-10 px-7 py-4 bg-gold hover:bg-goldLight text-navy font-bold text-[15px] rounded-full"
+                >
+                  Get started at ZAN <span>→</span>
+                </Link>
+              </div>
+
+              <div className="grid gap-4 content-start">
+                <div className="p-6 rounded-2xl bg-white/[0.04]">
+                  <div className="text-3xl font-extrabold text-gold">S3+</div>
+                  <div className="mt-1.5 text-sm text-muted2">Any home controller S3 or above, division-wide</div>
+                </div>
+                <div className="p-6 rounded-2xl bg-white/[0.04]">
+                  <div className="text-3xl font-extrabold text-teal">No minimums</div>
+                  <div className="mt-1.5 text-sm text-muted2">No activity requirement to exercise this privilege</div>
+                </div>
+                <div className="p-6 rounded-2xl bg-white/[0.04]">
+                  <div className="text-3xl font-extrabold text-purple">No roster needed</div>
+                  <div className="mt-1.5 text-sm text-muted2">Unless you're pursuing a Tier 2 endorsement</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -161,7 +253,7 @@ useEffect(() => {
             </div>
             <div className="p-9 rounded-3xl bg-white/[0.04]">
               <h3 className="font-extrabold text-xl tracking-tight">Control it</h3>
-              <p className="mt-3.5 text-muted leading-relaxed">Train here and you learn oceanic procedure, non-radar separation and terrain — the things most facilities never touch. Visiting controllers welcome from S2.</p>
+              <p className="mt-3.5 text-muted leading-relaxed">Train here and you learn oceanic procedure, non-radar separation and terrain — the things most facilities never touch. Visiting controllers welcome from S3.</p>
               <Link to="/apply" className="inline-flex mt-6 px-6 py-3.5 rounded-full border border-white/30 hover:border-white hover:bg-white/[0.06] text-ink font-bold text-[14.5px]">Apply to ZAN</Link>
             </div>
           </div>
