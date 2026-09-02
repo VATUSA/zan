@@ -51,4 +51,11 @@ router.put('/:id/reviewed', requireRole('TA'), (req, res) => {
   res.json({ success: true })
 })
 
+router.get('/about-me', (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Must be logged in' })
+  }
+  res.json(getReviewedFeedbackForController(req.user.cid))
+})
+
 export default router
