@@ -69,13 +69,17 @@ router.get('/', async (req, res) => {
   }
 })
 
+// Matches the fixed set of positions the frontend offers (RosterMember.jsx's POSITIONS).
+const ENDORSEMENT_POSITIONS = ['Unrestricted', 'Enroute', 'Oceanic']
+
 // Grant an endorsement - staff only (INS+), enforced by requireRole before this ever runs
 router.post('/endorsements', requireRole('INS'), (req, res) => {
   const { cid, position } = req.body
-  if (!cid || !position) {
-    return res.status(400).json({ error: 'Missing required fields' })
+  const targetCid = parseCid(cid)
+  if (!targetCid || !ENDORSEMENT_POSITIONS.includes(position)) {
+    return res.status(400).json({ error: 'Missing or invalid required fields' })
   }
-  addEndorsement(cid, position, req.user.cid)
+  addEndorsement(targetCid, position, req.user.cid)
   cachedRoster = null
   res.json({ success: true })
 })
@@ -83,10 +87,11 @@ router.post('/endorsements', requireRole('INS'), (req, res) => {
 // Revoke an endorsement - staff only (INS+)
 router.delete('/endorsements', requireRole('INS'), (req, res) => {
   const { cid, position } = req.body
-  if (!cid || !position) {
-    return res.status(400).json({ error: 'Missing required fields' })
+  const targetCid = parseCid(cid)
+  if (!targetCid || !ENDORSEMENT_POSITIONS.includes(position)) {
+    return res.status(400).json({ error: 'Missing or invalid required fields' })
   }
-  removeEndorsement(cid, position)
+  removeEndorsement(targetCid, position)
   cachedRoster = null
   res.json({ success: true })
 })
@@ -95,8 +100,9 @@ router.delete('/endorsements', requireRole('INS'), (req, res) => {
 router.put('/initials', requireRole('INS'), (req, res) => {
   const { cid, initials } = req.body
 
-  if (!cid || !initials) {
-    return res.status(400).json({ error: 'Missing required fields' })
+  const targetCid = parseCid(cid)
+  if (!targetCid || !initials) {
+    return res.status(400).json({ error: 'Missing or invalid required fields' })
   }
 
   const cleaned = initials.trim().toUpperCase()
@@ -104,7 +110,7 @@ router.put('/initials', requireRole('INS'), (req, res) => {
     return res.status(400).json({ error: 'Initials must be exactly 2 letters' })
   }
 
-  const result = setInitials(cid, cleaned)
+  const result = setInitials(targetCid, cleaned)
   if (!result.success) {
     return res.status(409).json(result)
   }

@@ -4,6 +4,12 @@ import { requireRole } from '../middleware/auth.js'
 
 const router = express.Router()
 
+const FEEDBACK_RATINGS = ['Excellent', 'Good', 'Fair', 'Poor']
+// "Position" here is actually the pilot's own callsign (e.g. "ANC_APP"), typed freely -
+// not an enum. Just cap its shape/length rather than allowlisting exact values.
+const CALLSIGN_PATTERN = /^[A-Z0-9_-]{1,16}$/
+const MAX_COMMENTS_LENGTH = 2000
+
 // Must be logged in to submit
 router.post('/', (req, res) => {
   if (!req.user) {
@@ -11,8 +17,14 @@ router.post('/', (req, res) => {
   }
 
   const { controllerCid, position, rating, comments } = req.body
-  if (!rating) {
-    return res.status(400).json({ error: 'Missing required fields' })
+  if (!FEEDBACK_RATINGS.includes(rating)) {
+    return res.status(400).json({ error: 'Invalid rating' })
+  }
+  if (position && !CALLSIGN_PATTERN.test(position)) {
+    return res.status(400).json({ error: 'Invalid position/callsign' })
+  }
+  if (typeof comments === 'string' && comments.length > MAX_COMMENTS_LENGTH) {
+    return res.status(400).json({ error: 'Comments are too long' })
   }
 
   submitFeedback({

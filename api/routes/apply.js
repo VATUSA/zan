@@ -85,9 +85,14 @@ router.get('/pending', requireRole('TA'), (req, res) => {
   res.json(getPendingApplications())
 })
 
+const APPLICATION_STATUSES = ['pending', 'approved', 'denied']
+
 // Staff only - approve/deny an application
 router.put('/:id/status', requireRole('TA'), (req, res) => {
   const { status } = req.body
+  if (!APPLICATION_STATUSES.includes(status)) {
+    return res.status(400).json({ error: 'Invalid status' })
+  }
   updateApplicationStatus(req.params.id, status)
   res.json({ success: true })
 })
