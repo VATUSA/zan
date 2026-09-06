@@ -104,6 +104,12 @@ export function AuthProvider({ children }) {
   }
 
   const loginAsDev = async (cid) => {
+    // The button that calls this is already hidden outside dev builds (Navbar.jsx), but
+    // that's UI-only - this stops the function itself from doing anything if it's ever
+    // reached another way (e.g. from the browser console) in a production build. The API's
+    // own dev-login route is separately gated the same way, so this can't grant a real
+    // session either way - it's a second layer, not the only one.
+    if (!import.meta.env.DEV) return
     setLoading(true)
     setError(null)
     try {
