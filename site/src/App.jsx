@@ -39,7 +39,7 @@ function App() {
 <Route path="/files/sops" element={<FilesSops />} />
 <Route path="/files/loas" element={<FilesLoas />} />
 <Route path="/files/training" element={<FilesTraining />} />
-<Route path="/files/admin" element={<FilesAdmin />} />
+<Route path="/files/admin" element={<RequireRole role="TA"><FilesAdmin /></RequireRole>} />
           <Route
             path="/roster/member/:cid"
             element={
