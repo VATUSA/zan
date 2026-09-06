@@ -15,30 +15,10 @@ export function AuthProvider({ children }) {
   // (if one ever ran, e.g. from a fast remount) fail verification for no real reason.
   const startedRef = useRef(false)
 
-  useEffect(() => {
-    if (startedRef.current) return
-    startedRef.current = true
-
-    const params = new URLSearchParams(window.location.search)
-    const code = params.get('code')
-
-    if (code) {
-      const returnedState = params.get('state')
-      const savedState = sessionStorage.getItem(OAUTH_STATE_KEY)
-      sessionStorage.removeItem(OAUTH_STATE_KEY)
-      window.history.replaceState({}, '', window.location.pathname)
-
-      if (!savedState || returnedState !== savedState) {
-        setError('That login could not be verified. Please try logging in again.')
-        setLoading(false)
-        return
-      }
-      exchangeCodeForUser(code)
-    } else {
-      checkExistingSession()
-    }
-  }, [])
-
+  // Declared before the effect below that calls them, so referencing them there doesn't
+  // depend on function hoisting order at all (it worked either way - effects only run after
+  // render, once these consts are assigned - but this keeps the linter's static analysis and
+  // the actual runtime order in agreement).
   const checkExistingSession = async () => {
     try {
       const response = await fetch(`${API_URL}/api/auth/me`, {
@@ -48,7 +28,7 @@ export function AuthProvider({ children }) {
         const data = await response.json()
         setUser(data)
       }
-    } catch (err) {
+    } catch {
       // no valid session, stay logged out
     } finally {
       setLoading(false)
@@ -72,12 +52,38 @@ export function AuthProvider({ children }) {
       } else {
         setUser(data)
       }
-    } catch (err) {
+    } catch {
       setError('Could not reach backend server')
     } finally {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (startedRef.current) return
+    startedRef.current = true
+
+    const params = new URLSearchParams(window.location.search)
+    const code = params.get('code')
+
+    if (code) {
+      const returnedState = params.get('state')
+      const savedState = sessionStorage.getItem(OAUTH_STATE_KEY)
+      sessionStorage.removeItem(OAUTH_STATE_KEY)
+      window.history.replaceState({}, '', window.location.pathname)
+
+      if (!savedState || returnedState !== savedState) {
+        // One-time check of the URL/sessionStorage on mount - no external event to move this into.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setError('That login could not be verified. Please try logging in again.')
+        setLoading(false)
+        return
+      }
+      exchangeCodeForUser(code)
+    } else {
+      checkExistingSession()
+    }
+  }, [])
 
   const loginWithVatsim = () => {
     if (missingAuthConfig.length > 0) {
@@ -123,7 +129,7 @@ export function AuthProvider({ children }) {
       } else {
         setUser(data)
       }
-    } catch (err) {
+    } catch {
       setError('Could not reach backend server')
     } finally {
       setLoading(false)
@@ -145,6 +151,9 @@ export function AuthProvider({ children }) {
   )
 }
 
+// Splitting this into its own file means updating every one of the ~15 files that import
+// useAuth from here, for a pure Vite-dev-server hot-reload nicety with no functional effect.
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   return useContext(AuthContext)
 }

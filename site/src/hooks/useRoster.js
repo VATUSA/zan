@@ -21,6 +21,9 @@ export function useRoster() {
   }, [])
 
   useEffect(() => {
+    // Standard fetch-on-mount; fetchRoster's own setLoading/setState calls are what this
+    // rule is tracing through here.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchRoster()
   }, [fetchRoster])
 

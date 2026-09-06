@@ -21,6 +21,9 @@ export function useFiles() {
   }, [])
 
   useEffect(() => {
+    // Standard fetch-on-mount; fetchFiles's own setLoading/setState calls are what this
+    // rule is tracing through here.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchFiles()
   }, [fetchFiles])
 
