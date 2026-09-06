@@ -15,7 +15,7 @@ router.post('/callback', async (req, res) => {
   }
 
   try {
-    const tokenResponse = await fetch('https://auth.vatsim.net/oauth/token', {
+    const tokenResponse = await fetch(process.env.VATSIM_TOKEN_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
