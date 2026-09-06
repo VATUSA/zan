@@ -33,7 +33,7 @@ router.post('/callback', async (req, res) => {
       return res.status(400).json({ error: 'Token exchange failed' })
     }
 
-    const userResponse = await fetch('https://auth.vatsim.net/api/user', {
+    const userResponse = await fetch(new URL('/api/user', process.env.VATSIM_TOKEN_URL), {
       headers: { Authorization: `Bearer ${tokenData.access_token}` },
     })
 
