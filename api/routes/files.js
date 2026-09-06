@@ -2,6 +2,7 @@ import express from 'express'
 import multer from 'multer'
 import path from 'path'
 import fs from 'fs'
+import contentDisposition from 'content-disposition'
 import { addFile, getAllFiles, getFile, deleteFileRecord } from '../db.js'
 import { requireRole } from '../middleware/auth.js'
 import { isKnownCategory, canSeeCategory } from '../utils/files.js'
@@ -41,9 +42,14 @@ router.get('/:id/download', (req, res) => {
   const filePath = path.join(process.cwd(), 'uploads', file.filename)
 
   if (file.original_name.toLowerCase().endsWith('.pdf')) {
-    // Open PDFs inline in the browser instead of forcing a download
+    // Open PDFs inline in the browser instead of forcing a download. Building this header
+    // by hand (`inline; filename="${file.original_name}"`) let a crafted original_name break
+    // out of the quoted string or, worse, include a raw newline - Node's setHeader() throws
+    // on \r/\n so that particular case would just 500, but a stray `"` could still corrupt
+    // the header. content-disposition (the same package res.download() uses internally)
+    // handles the escaping correctly.
     res.setHeader('Content-Type', 'application/pdf')
-    res.setHeader('Content-Disposition', `inline; filename="${file.original_name}"`)
+    res.setHeader('Content-Disposition', contentDisposition(file.original_name, { type: 'inline' }))
     res.sendFile(filePath)
   } else {
     res.download(filePath, file.original_name)
