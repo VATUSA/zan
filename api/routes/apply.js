@@ -1,11 +1,25 @@
 import express from 'express'
 import { submitApplication, getPendingApplications, updateApplicationStatus } from '../db.js'
 import { requireRole } from '../middleware/auth.js'
+import { parseCid } from '../utils/validate.js'
 
 const router = express.Router()
 
+// Must be logged in, and can only check your own eligibility - this endpoint returns a
+// VATUSA member's name, email, facility, and rating, none of which should be exposed to
+// an anonymous caller or to someone looking up a CID that isn't their own.
 router.get('/eligibility/:cid', async (req, res) => {
-  const { cid } = req.params
+  if (!req.user) {
+    return res.status(401).json({ error: 'Must be logged in' })
+  }
+
+  const cid = parseCid(req.params.cid)
+  if (!cid) {
+    return res.status(400).json({ error: 'Invalid CID' })
+  }
+  if (cid !== req.user.cid) {
+    return res.status(403).json({ error: 'Not authorized' })
+  }
 
   try {
     const response = await fetch(

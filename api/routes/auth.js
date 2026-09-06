@@ -3,6 +3,7 @@ import { getRoles } from '../db.js'
 import { getHighestRole } from '../utils/roles.js'
 import { createSessionToken, verifySessionToken } from '../utils/session.js'
 import { COOKIE_OPTIONS } from '../config.js'
+import { parseCid } from '../utils/validate.js'
 
 const router = express.Router()
 
@@ -85,7 +86,10 @@ router.get('/dev-login/:cid', async (req, res) => {
     return res.status(404).json({ error: 'Not found' })
   }
 
-  const { cid } = req.params
+  const cid = parseCid(req.params.cid)
+  if (!cid) {
+    return res.status(400).json({ error: 'Invalid CID' })
+  }
 
   try {
     const vatusaResponse = await fetch(
