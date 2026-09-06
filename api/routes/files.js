@@ -4,6 +4,7 @@ import path from 'path'
 import fs from 'fs'
 import { addFile, getAllFiles, getFile, deleteFileRecord } from '../db.js'
 import { requireRole } from '../middleware/auth.js'
+import { isKnownCategory, canSeeCategory } from '../utils/files.js'
 
 const router = express.Router()
 
@@ -22,15 +23,20 @@ const upload = multer({
   limits: { fileSize: 20 * 1024 * 1024 }, // 20MB cap
 })
 
-// Public - list all files
+// List files - Admin Policies rows are dropped for anyone below TA
 router.get('/', (req, res) => {
-  res.json(getAllFiles())
+  const files = getAllFiles().filter((f) => canSeeCategory(req.user?.zanRole, f.category))
+  res.json(files)
 })
 
-// Public - download a specific file
+// Download a specific file - same category check as the list, so a category can't be
+// found by other means (a shared link, a stale bookmark) and downloaded directly
 router.get('/:id/download', (req, res) => {
   const file = getFile(req.params.id)
   if (!file) return res.status(404).json({ error: 'File not found' })
+  if (!canSeeCategory(req.user?.zanRole, file.category)) {
+    return res.status(403).json({ error: 'Not authorized' })
+  }
 
   const filePath = path.join(process.cwd(), 'uploads', file.filename)
 
@@ -51,10 +57,12 @@ router.post('/', requireRole('TA'), upload.single('file'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' })
   }
-  if (!title || !category) {
-    // clean up the file we just saved, since we're rejecting this upload
+  if (!title || !isKnownCategory(category)) {
+    // clean up the file we just saved, since we're rejecting this upload. Validating the
+    // category here matters, not just on read - an off-list category (e.g. a typo'd
+    // "admin policies") would otherwise slip past the exact-match check in canSeeCategory.
     fs.unlinkSync(req.file.path)
-    return res.status(400).json({ error: 'Missing title or category' })
+    return res.status(400).json({ error: 'Missing title or unknown category' })
   }
 
   addFile({
