@@ -2,15 +2,9 @@ import express from 'express'
 import { getRoles } from '../db.js'
 import { getHighestRole } from '../utils/roles.js'
 import { createSessionToken, verifySessionToken } from '../utils/session.js'
+import { COOKIE_OPTIONS } from '../config.js'
 
 const router = express.Router()
-
-const COOKIE_OPTIONS = {
-  httpOnly: true,       // JavaScript in the browser can't read or touch this cookie at all
-  sameSite: 'lax',      // sent on normal navigation, blocks most cross-site abuse
-  secure: process.env.NODE_ENV === 'production', // false locally over http, true once deployed over https
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days, in milliseconds
-}
 
 router.post('/callback', async (req, res) => {
   const { code } = req.body
