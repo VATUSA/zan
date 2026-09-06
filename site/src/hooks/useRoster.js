@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { API_URL } from '../config'
+import { apiGet } from '../utils/api'
 
 export function useRoster() {
   const [roster, setRoster] = useState([])
@@ -8,8 +8,8 @@ export function useRoster() {
 
   const fetchRoster = useCallback(() => {
     setLoading(true)
-    fetch(`${API_URL}/api/roster`, { credentials: 'include' })
-      .then((res) => res.json())
+    setError(null)
+    apiGet('/api/roster')
       .then((data) => {
         setRoster(data)
         setLoading(false)

@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import { useRoster } from '../hooks/useRoster'
 import { hasMinimumRole, ALL_ROLES } from '../utils/roles'
 import { API_URL } from '../config'
+import { apiGet } from '../utils/api'
 import { useState, useEffect } from 'react'
 
 const POSITIONS = ['Unrestricted', 'Enroute', 'Oceanic']
@@ -23,29 +24,34 @@ function RosterMember() {
   const [roleError, setRoleError] = useState(null)
 
   const [controllerFeedback, setControllerFeedback] = useState([])
+  const [feedbackError, setFeedbackError] = useState(null)
+  const [endorsementError, setEndorsementError] = useState(null)
 
   const member = roster.find((m) => String(m.cid) === cid)
   const isSeniorStaff = hasMinimumRole(user?.zanRole, 'TA')
 
   useEffect(() => {
     if (tab === 'feedback' && member && isSeniorStaff) {
-      fetch(`${API_URL}/api/feedback/controller/${member.cid}`, {
-        credentials: 'include',
-      })
-        .then((res) => res.json())
+      apiGet(`/api/feedback/controller/${member.cid}`)
         .then(setControllerFeedback)
+        .catch(() => setFeedbackError('Could not load feedback'))
     }
   }, [tab, member, isSeniorStaff, user])
 
   const toggleEndorsement = async (position) => {
     if (!member) return
+    setEndorsementError(null)
     const hasIt = member.endorsements.includes(position)
-    await fetch(`${API_URL}/api/roster/endorsements`, {
+    const response = await fetch(`${API_URL}/api/roster/endorsements`, {
       method: hasIt ? 'DELETE' : 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ cid: member.cid, position }),
     })
+    if (!response.ok) {
+      setEndorsementError('Could not update that endorsement')
+      return
+    }
     refetch()
   }
 
@@ -87,12 +93,18 @@ function RosterMember() {
   }
 
   const removeMemberRole = async (role) => {
-    await fetch(`${API_URL}/api/roster/roles`, {
+    setRoleError(null)
+    const response = await fetch(`${API_URL}/api/roster/roles`, {
       method: 'DELETE',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ cid: member.cid, role }),
     })
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}))
+      setRoleError(data.error || 'Could not remove role')
+      return
+    }
     refetch()
   }
 
@@ -181,6 +193,7 @@ function RosterMember() {
             </div>
 
             <h2 className="text-xl font-extrabold tracking-tight mb-4">Certifications</h2>
+            {endorsementError && <p className="text-sm text-red-400 mb-3">{endorsementError}</p>}
             <div className="grid grid-cols-2 gap-5 max-w-[500px]">
               {POSITIONS.map((pos) => {
                 const has = member.endorsements.includes(pos)
@@ -209,7 +222,8 @@ function RosterMember() {
         {tab === 'feedback' && isSeniorStaff && (
           <div>
             <h2 className="text-xl font-extrabold tracking-tight mb-4">Feedback</h2>
-            {controllerFeedback.length === 0 && (
+            {feedbackError && <p className="text-red-400">{feedbackError}</p>}
+            {!feedbackError && controllerFeedback.length === 0 && (
               <p className="text-muted2">No reviewed feedback yet.</p>
             )}
             <div className="space-y-3">

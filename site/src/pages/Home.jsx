@@ -3,16 +3,14 @@ import { Link } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { useAuth } from '../context/AuthContext'
-import { API_URL } from '../config'
+import { apiGet } from '../utils/api'
 
 function Home() {
   const { user } = useAuth()
   const [events, setEvents] = useState([])
-  const firstName = user?.name?.split(' ')[0]
 
   useEffect(() => {
-    fetch(`${API_URL}/api/events`, { credentials: 'include' })
-      .then((res) => res.json())
+    apiGet('/api/events')
       .then((data) => setEvents(data.slice(0, 2)))
       .catch(() => setEvents([]))
   }, [user])

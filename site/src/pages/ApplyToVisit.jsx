@@ -12,6 +12,7 @@ function ApplyToVisit() {
   const [reason, setReason] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState(null)
 
   useEffect(() => {
     if (!user) return
@@ -48,7 +49,11 @@ function ApplyToVisit() {
 
   const submitApplication = async () => {
     setSubmitting(true)
-    await fetch(`${API_URL}/api/apply/submit`, {
+    setSubmitError(null)
+    // The identity fields below are re-derived server-side from VATUSA using the logged-in
+    // session, not trusted from here - sent anyway so nothing needs to change if that ever
+    // stops being true, but they're effectively ignored by the API.
+    const response = await fetch(`${API_URL}/api/apply/submit`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -62,6 +67,10 @@ function ApplyToVisit() {
       }),
     })
     setSubmitting(false)
+    if (!response.ok) {
+      setSubmitError('Could not submit your application. Please try again.')
+      return
+    }
     setSubmitted(true)
   }
 
@@ -129,6 +138,7 @@ function ApplyToVisit() {
                 >
                   {submitting ? 'Submitting...' : 'Submit Application'}
                 </button>
+                {submitError && <p className="text-sm text-red-400 mt-3">{submitError}</p>}
                 {!allRequiredPassed && (
                   <p className="text-sm text-red-400 mt-3">
                     You don't currently meet all requirements to apply.
