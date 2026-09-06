@@ -1,11 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import { API_URL } from '../config'
+import { API_URL, VATSIM_AUTH_URL, VATSIM_CLIENT_ID, VATSIM_REDIRECT_URI, missingAuthConfig } from '../config'
 
 const AuthContext = createContext(null)
-
-const VATSIM_AUTH_URL = 'https://auth-dev.vatsim.net/oauth/authorize'
-const CLIENT_ID = import.meta.env.VITE_VATSIM_CLIENT_ID
-const REDIRECT_URI = 'http://localhost:5173/'
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
@@ -65,9 +61,13 @@ export function AuthProvider({ children }) {
   }
 
   const loginWithVatsim = () => {
+    if (missingAuthConfig.length > 0) {
+      setError(`Login is not configured (missing ${missingAuthConfig.join(', ')})`)
+      return
+    }
     const params = new URLSearchParams({
-      client_id: CLIENT_ID,
-      redirect_uri: REDIRECT_URI,
+      client_id: VATSIM_CLIENT_ID,
+      redirect_uri: VATSIM_REDIRECT_URI,
       response_type: 'code',
       scope: 'full_name email vatsim_details',
       prompt: 'login',
