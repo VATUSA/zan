@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import ErrorBoundary from './components/ErrorBoundary'
 import Home from './pages/Home'
 import About from './pages/About'
 import RosterHome from './pages/RosterHome'
@@ -21,6 +22,7 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <ErrorBoundary>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
@@ -37,7 +39,7 @@ function App() {
 <Route path="/files/sops" element={<FilesSops />} />
 <Route path="/files/loas" element={<FilesLoas />} />
 <Route path="/files/training" element={<FilesTraining />} />
-<Route path="/files/admin" element={<FilesAdmin />} />
+<Route path="/files/admin" element={<RequireRole role="TA"><FilesAdmin /></RequireRole>} />
           <Route
             path="/roster/member/:cid"
             element={
@@ -55,6 +57,7 @@ function App() {
   }
 />
         </Routes>
+        </ErrorBoundary>
       </BrowserRouter>
     </AuthProvider>
   )

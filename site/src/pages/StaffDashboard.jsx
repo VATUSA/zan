@@ -4,39 +4,45 @@ import Footer from '../components/Footer'
 import { useAuth } from '../context/AuthContext'
 import { Link } from 'react-router-dom'
 import { API_URL } from '../config'
+import { apiGet } from '../utils/api'
 
 function StaffDashboard() {
   const { user } = useAuth()
   const [feedback, setFeedback] = useState([])
   const [applications, setApplications] = useState([])
+  const [error, setError] = useState(null)
 
   const load = () => {
     if (!user) return
-    fetch(`${API_URL}/api/feedback`, { credentials: 'include' })
-      .then((res) => res.json())
-      .then(setFeedback)
-    fetch(`${API_URL}/api/apply/pending`, { credentials: 'include' })
-      .then((res) => res.json())
-      .then(setApplications)
+    apiGet('/api/feedback').then(setFeedback).catch(() => setError('Could not load feedback'))
+    apiGet('/api/apply/pending').then(setApplications).catch(() => setError('Could not load applications'))
   }
 
   useEffect(load, [user])
 
   const reviewFeedback = async (id) => {
-    await fetch(`${API_URL}/api/feedback/${id}/reviewed`, {
+    const response = await fetch(`${API_URL}/api/feedback/${id}/reviewed`, {
       method: 'PUT',
       credentials: 'include',
     })
+    if (!response.ok) {
+      alert('Could not mark feedback reviewed')
+      return
+    }
     load()
   }
 
   const decideApplication = async (id, status) => {
-    await fetch(`${API_URL}/api/apply/${id}/status`, {
+    const response = await fetch(`${API_URL}/api/apply/${id}/status`, {
       method: 'PUT',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
     })
+    if (!response.ok) {
+      alert('Could not update application')
+      return
+    }
     load()
   }
 
@@ -47,6 +53,8 @@ function StaffDashboard() {
       <div className="max-w-[1000px] mx-auto px-10 py-16">
         <h1 className="text-4xl font-extrabold tracking-tight mb-2">Staff Dashboard</h1>
         <p className="text-muted mb-12">Command center for ARTCC staff.</p>
+
+        {error && <p className="text-red-400 mb-8">{error}</p>}
 
         <section className="mb-16">
           <h2 className="text-xl font-extrabold tracking-tight mb-5">
