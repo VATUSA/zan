@@ -70,19 +70,27 @@ export function assignInitialsIfNeeded(cid, fname, lname) {
   const existing = getInitials(cid)
   if (existing) return existing
 
-  const natural = (fname[0] + lname[0]).toUpperCase()
+  // fname/lname come from VATUSA's roster and aren't guaranteed non-blank - a missing or
+  // empty name used to crash this on `fname[0]` of null/undefined. A blank name just skips
+  // straight to the random fallback below instead.
+  const natural = fname?.[0] && lname?.[0] ? (fname[0] + lname[0]).toUpperCase() : null
 
-  if (!isInitialsTaken(natural)) {
+  if (natural && /^[A-Z]{2}$/.test(natural) && !isInitialsTaken(natural)) {
     db.prepare('INSERT INTO operating_initials (cid, initials) VALUES (?, ?)').run(cid, natural)
     return natural
   }
 
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
   let attempt
+  let tries = 0
   do {
     const a = letters[Math.floor(Math.random() * 26)]
     const b = letters[Math.floor(Math.random() * 26)]
     attempt = a + b
+    tries += 1
+    // 676 possible two-letter combinations - if we've somehow tried them all, stop looping
+    // forever and let the unique constraint (or a human) sort it out instead.
+    if (tries > 1000) throw new Error(`Could not find a free set of initials for cid ${cid}`)
   } while (isInitialsTaken(attempt))
 
   db.prepare('INSERT INTO operating_initials (cid, initials) VALUES (?, ?)').run(cid, attempt)
@@ -221,10 +229,6 @@ export function submitFeedback({ controllerCid, position, rating, comments, pilo
 
 export function getAllFeedback() {
   return db.prepare('SELECT * FROM feedback ORDER BY created_at DESC').all()
-}
-
-export function getFeedbackForController(cid) {
-  return db.prepare('SELECT * FROM feedback WHERE controller_cid = ? ORDER BY created_at DESC').all(cid)
 }
 
 export function getReviewedFeedbackForController(cid) {

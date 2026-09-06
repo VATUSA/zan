@@ -5,8 +5,8 @@ import { requireRole } from '../middleware/auth.js'
 const router = express.Router()
 
 const FEEDBACK_RATINGS = ['Excellent', 'Good', 'Fair', 'Poor']
-// "Position" here is actually the pilot's own callsign (e.g. "ANC_APP"), typed freely -
-// not an enum. Just cap its shape/length rather than allowlisting exact values.
+// `position` is the ATC position being rated (e.g. "ANC_APP"), typed freely - not an enum.
+// Just cap its shape/length rather than allowlisting exact values.
 const CALLSIGN_PATTERN = /^[A-Z0-9_-]{1,16}$/
 const MAX_COMMENTS_LENGTH = 2000
 
@@ -34,7 +34,10 @@ router.post('/', (req, res) => {
     comments,
     pilotCid: req.user.cid,
     pilotName: req.user.name,
-    pilotCallsign: position,
+    // pilotCallsign is a distinct column for the pilot's own aircraft callsign - `position`
+    // is the ATC position being rated, a different thing entirely. There's no form field
+    // that actually collects the pilot's callsign, so there's nothing correct to put here.
+    pilotCallsign: null,
   })
   res.json({ success: true })
 })
