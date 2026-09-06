@@ -4,6 +4,7 @@ import Footer from '../components/Footer'
 import { useAuth } from '../context/AuthContext'
 import { useRoster } from '../hooks/useRoster'
 import { API_URL } from '../config'
+import { apiGet } from '../utils/api'
 
 function Feedback() {
   const { user, loginWithVatsim } = useAuth()
@@ -17,12 +18,13 @@ function Feedback() {
   const [submitted, setSubmitted] = useState(false)
 
   const [myFeedback, setMyFeedback] = useState([])
+  const [myFeedbackError, setMyFeedbackError] = useState(null)
 
   useEffect(() => {
     if (tab === 'mine' && user) {
-      fetch(`${API_URL}/api/feedback/mine`, { credentials: 'include' })
-        .then((res) => res.json())
+      apiGet('/api/feedback/mine')
         .then(setMyFeedback)
+        .catch(() => setMyFeedbackError('Could not load your feedback'))
     }
   }, [tab, user])
 
@@ -180,7 +182,8 @@ function Feedback() {
 
         {tab === 'mine' && (
           <div className="space-y-3">
-            {myFeedback.length === 0 && (
+            {myFeedbackError && <p className="text-red-400">{myFeedbackError}</p>}
+            {!myFeedbackError && myFeedback.length === 0 && (
               <p className="text-muted2">You haven't submitted any feedback yet.</p>
             )}
             {myFeedback.map((f) => (

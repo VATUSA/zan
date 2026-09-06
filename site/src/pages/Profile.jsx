@@ -3,17 +3,18 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { useAuth } from '../context/AuthContext'
 import { Link } from 'react-router-dom'
-import { API_URL } from '../config'
+import { apiGet } from '../utils/api'
 
 function Profile() {
   const { user } = useAuth()
   const [myFeedback, setMyFeedback] = useState([])
+  const [feedbackError, setFeedbackError] = useState(null)
 
   useEffect(() => {
     if (!user) return
-    fetch(`${API_URL}/api/feedback/about-me`, { credentials: 'include' })
-      .then((res) => res.json())
+    apiGet('/api/feedback/about-me')
       .then(setMyFeedback)
+      .catch(() => setFeedbackError('Could not load feedback'))
   }, [user])
 
   if (!user) {
@@ -72,7 +73,8 @@ function Profile() {
 
         <div className="rounded-2xl bg-white/[0.04] p-6 mb-6">
           <div className="text-xs font-semibold text-muted2 uppercase tracking-wide mb-3">Feedback about you</div>
-          {myFeedback.length === 0 && (
+          {feedbackError && <p className="text-sm text-red-400">{feedbackError}</p>}
+          {!feedbackError && myFeedback.length === 0 && (
             <p className="text-sm text-muted3">No reviewed feedback yet.</p>
           )}
           <div className="space-y-3">

@@ -63,12 +63,14 @@ function Navbar() {
             >
               {loading ? 'Connecting...' : 'Get started'}
             </button>
-            <button
-              onClick={() => loginAsDev(1394476)}
-              className="px-4 py-2 rounded-full border border-white/20 text-muted3 hover:text-ink text-xs font-semibold"
-            >
-              Dev login
-            </button>
+            {import.meta.env.DEV && (
+              <button
+                onClick={() => loginAsDev(1394476)}
+                className="px-4 py-2 rounded-full border border-white/20 text-muted3 hover:text-ink text-xs font-semibold"
+              >
+                Dev login
+              </button>
+            )}
           </div>
         )}
 
@@ -130,12 +132,14 @@ function Navbar() {
               >
                 {loading ? 'Connecting...' : 'Get started'}
               </button>
-              <button
-                onClick={() => loginAsDev(1394476)}
-                className="px-4 py-2.5 rounded-full border border-white/20 text-muted3 hover:text-ink text-xs font-semibold"
-              >
-                Dev login
-              </button>
+              {import.meta.env.DEV && (
+                <button
+                  onClick={() => loginAsDev(1394476)}
+                  className="px-4 py-2.5 rounded-full border border-white/20 text-muted3 hover:text-ink text-xs font-semibold"
+                >
+                  Dev login
+                </button>
+              )}
             </div>
           )}
         </div>
