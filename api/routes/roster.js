@@ -4,8 +4,9 @@ import {
   getAllInitials, assignInitialsIfNeeded, seedRealInitials, setInitials, getInitials,
   getAllRoles, addRole, removeRole,
 } from '../db.js'
-import { getHighestRole } from '../utils/roles.js'
+import { getHighestRole, ALL_ROLES, getRoleLevel } from '../utils/roles.js'
 import { requireRole } from '../middleware/auth.js'
+import { parseCid } from '../utils/validate.js'
 
 const router = express.Router()
 
@@ -112,13 +113,39 @@ router.put('/initials', requireRole('INS'), (req, res) => {
   res.json({ success: true })
 })
 
+// Shared checks for granting/revoking a role: the role name has to be a real one, you can't
+// touch your own roles (no self-promotion or self-protection from demotion), and you can only
+// manage roles strictly below your own level - a DATM can't hand out ATM, and (as a documented
+// tradeoff) an ATM can't use this endpoint to hand ATM to a successor either. That handover
+// stays a manual DB operation for now rather than something any ATM can grant themselves back.
+function validateRoleChange(req, res, cid, role) {
+  const targetCid = parseCid(cid)
+  if (!targetCid || !role) {
+    res.status(400).json({ error: 'Missing or invalid required fields' })
+    return null
+  }
+  if (!ALL_ROLES.includes(role)) {
+    res.status(400).json({ error: 'Unknown role' })
+    return null
+  }
+  if (targetCid === req.user.cid) {
+    res.status(403).json({ error: "You can't change your own roles" })
+    return null
+  }
+  if (getRoleLevel(role) >= getRoleLevel(req.user.zanRole)) {
+    res.status(403).json({ error: 'You can only manage roles below your own' })
+    return null
+  }
+  return targetCid
+}
+
 // Assign a role - DATM+ only
 router.post('/roles', requireRole('DATM'), (req, res) => {
   const { cid, role } = req.body
-  if (!cid || !role) {
-    return res.status(400).json({ error: 'Missing required fields' })
-  }
-  addRole(cid, role)
+  const targetCid = validateRoleChange(req, res, cid, role)
+  if (targetCid === null) return
+
+  addRole(targetCid, role)
   cachedRoster = null
   res.json({ success: true })
 })
@@ -126,10 +153,10 @@ router.post('/roles', requireRole('DATM'), (req, res) => {
 // Remove a role - DATM+ only
 router.delete('/roles', requireRole('DATM'), (req, res) => {
   const { cid, role } = req.body
-  if (!cid || !role) {
-    return res.status(400).json({ error: 'Missing required fields' })
-  }
-  removeRole(cid, role)
+  const targetCid = validateRoleChange(req, res, cid, role)
+  if (targetCid === null) return
+
+  removeRole(targetCid, role)
   cachedRoster = null
   res.json({ success: true })
 })
