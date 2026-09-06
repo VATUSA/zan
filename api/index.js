@@ -6,6 +6,8 @@ import { checkEnv } from './config.js'
 import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
+import helmet from 'helmet'
+import rateLimit from 'express-rate-limit'
 import authRoutes from './routes/auth.js'
 import rosterRoutes from './routes/roster.js'
 import applyRoutes from './routes/apply.js'
@@ -23,6 +25,42 @@ console.log('Database connected, roles seeded.')
 const app = express()
 const PORT = process.env.PORT || 4000
 
+// A specific hop count, never `true`. `true` trusts X-Forwarded-For from anyone, which lets
+// a client hand the rate limiter (and anything else keyed on IP) whatever "IP" it wants -
+// both evading its own limit and poisoning another user's bucket. Defaults to 0 (trust
+// nothing, use the raw socket address) rather than assuming a reverse proxy is present -
+// an assumed "1" is just as spoofable as `true` when there's actually no proxy in front
+// stripping/overwriting client-supplied X-Forwarded-For. Set TRUST_PROXY_HOPS to the real
+// number of trusted reverse proxies in front of this server once deployed.
+const trustProxyHops = process.env.TRUST_PROXY_HOPS !== undefined
+  ? Number(process.env.TRUST_PROXY_HOPS)
+  : 0
+app.set('trust proxy', trustProxyHops)
+
+// A generous baseline for every route - this exists to blunt abuse/DoS, not to ration
+// normal use. A single event page fires several requests per load (more under React
+// StrictMode in dev), so this needs real headroom.
+app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 300, standardHeaders: true, legacyHeaders: false }))
+
+// Tighter limits on the routes that either cost money (VATUSA/VATSIM calls) or are the
+// natural target of brute-forcing/spam: auth, applications, and feedback submission.
+const strictLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later' },
+})
+
+app.use(helmet({
+  // This is a pure JSON + file-download API with no HTML pages of its own, so helmet's
+  // default CSP (meant for rendered pages) doesn't apply here and only adds noise.
+  contentSecurityPolicy: false,
+  // helmet defaults resources to same-origin only, which would block the frontend (a
+  // different origin) from embedding anything served here - e.g. an <img> or <iframe> onto
+  // an uploaded file - even though plain <a href> downloads aren't affected either way.
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+}))
 app.use(cors({
   origin: process.env.FRONTEND_URL,
   credentials: true,
@@ -35,10 +73,10 @@ app.get('/', (req, res) => {
   res.send('ZAN RTAC API is running')
 })
 
-app.use('/api/auth', authRoutes)
+app.use('/api/auth', strictLimiter, authRoutes)
 app.use('/api/roster', rosterRoutes)
-app.use('/api/apply', applyRoutes)
-app.use('/api/feedback', feedbackRoutes)
+app.use('/api/apply', strictLimiter, applyRoutes)
+app.use('/api/feedback', strictLimiter, feedbackRoutes)
 app.use('/api/events', eventsRoutes)
 app.use('/api/files', filesRoutes)
 
