@@ -2,15 +2,10 @@ import express from 'express'
 import { getRoles } from '../db.js'
 import { getHighestRole } from '../utils/roles.js'
 import { createSessionToken, verifySessionToken } from '../utils/session.js'
+import { COOKIE_OPTIONS } from '../config.js'
+import { parseCid } from '../utils/validate.js'
 
 const router = express.Router()
-
-const COOKIE_OPTIONS = {
-  httpOnly: true,       // JavaScript in the browser can't read or touch this cookie at all
-  sameSite: 'lax',      // sent on normal navigation, blocks most cross-site abuse
-  secure: process.env.NODE_ENV === 'production', // false locally over http, true once deployed over https
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days, in milliseconds
-}
 
 router.post('/callback', async (req, res) => {
   const { code } = req.body
@@ -35,7 +30,7 @@ router.post('/callback', async (req, res) => {
     const tokenData = await tokenResponse.json()
     if (!tokenResponse.ok) {
       console.error('Token exchange failed:', tokenData)
-      return res.status(400).json({ error: 'Token exchange failed', details: tokenData })
+      return res.status(400).json({ error: 'Token exchange failed' })
     }
 
     const userResponse = await fetch('https://auth.vatsim.net/api/user', {
@@ -45,7 +40,7 @@ router.post('/callback', async (req, res) => {
     const userData = await userResponse.json()
     if (!userResponse.ok) {
       console.error('VATSIM user fetch failed:', userData)
-      return res.status(400).json({ error: 'VATSIM user fetch failed', details: userData })
+      return res.status(400).json({ error: 'VATSIM user fetch failed' })
     }
 
     const cid = userData.data.cid
@@ -91,7 +86,10 @@ router.get('/dev-login/:cid', async (req, res) => {
     return res.status(404).json({ error: 'Not found' })
   }
 
-  const { cid } = req.params
+  const cid = parseCid(req.params.cid)
+  if (!cid) {
+    return res.status(400).json({ error: 'Invalid CID' })
+  }
 
   try {
     const vatusaResponse = await fetch(
