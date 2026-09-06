@@ -19,9 +19,30 @@ const storage = multer.diskStorage({
   },
 })
 
+// Both the extension and the browser-reported mimetype have to match one of these - neither
+// alone is trustworthy (a client can rename a file or lie about its Content-Type), but
+// together they at least rule out someone uploading, say, an .html or .svg file that would
+// later be served back from this same origin.
+const ALLOWED_TYPES = {
+  '.pdf': 'application/pdf',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+}
+
 const upload = multer({
   storage,
   limits: { fileSize: 20 * 1024 * 1024 }, // 20MB cap
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase()
+    if (ALLOWED_TYPES[ext] !== file.mimetype) {
+      req.fileRejected = true
+      return cb(null, false)
+    }
+    cb(null, true)
+  },
 })
 
 // List files - Admin Policies rows are dropped for anyone below TA
@@ -60,6 +81,9 @@ router.get('/:id/download', (req, res) => {
 router.post('/', requireRole('TA'), upload.single('file'), (req, res) => {
   const { title, category } = req.body
 
+  if (req.fileRejected) {
+    return res.status(400).json({ error: 'File type not allowed (pdf, png, jpg, docx, xlsx only)' })
+  }
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' })
   }

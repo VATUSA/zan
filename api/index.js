@@ -6,6 +6,7 @@ import { checkEnv } from './config.js'
 import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
+import helmet from 'helmet'
 import authRoutes from './routes/auth.js'
 import rosterRoutes from './routes/roster.js'
 import applyRoutes from './routes/apply.js'
@@ -23,6 +24,15 @@ console.log('Database connected, roles seeded.')
 const app = express()
 const PORT = process.env.PORT || 4000
 
+app.use(helmet({
+  // This is a pure JSON + file-download API with no HTML pages of its own, so helmet's
+  // default CSP (meant for rendered pages) doesn't apply here and only adds noise.
+  contentSecurityPolicy: false,
+  // helmet defaults resources to same-origin only, which would block the frontend (a
+  // different origin) from embedding anything served here - e.g. an <img> or <iframe> onto
+  // an uploaded file - even though plain <a href> downloads aren't affected either way.
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+}))
 app.use(cors({
   origin: process.env.FRONTEND_URL,
   credentials: true,
