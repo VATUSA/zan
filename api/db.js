@@ -317,6 +317,10 @@ export function getPositionsForEvent(eventId) {
   return db.prepare('SELECT * FROM event_positions WHERE event_id = ? ORDER BY created_at ASC').all(eventId)
 }
 
+export function getEventPosition(id) {
+  return db.prepare('SELECT * FROM event_positions WHERE id = ?').get(id)
+}
+
 db.exec(`
   CREATE TABLE IF NOT EXISTS event_signups (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
