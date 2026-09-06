@@ -1,10 +1,11 @@
+// config.js must be the first import in this file. ES module imports are hoisted and
+// evaluated in source order before any of index.js's own code runs - so because config.js
+// is listed first, its dotenv side effect happens before routes/auth.js (and anything else
+// below) is evaluated, instead of racing it. See config.js for the rest of the story.
+import { checkEnv } from './config.js'
 import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
-import dotenv from 'dotenv'
-
-dotenv.config()
-
 import authRoutes from './routes/auth.js'
 import rosterRoutes from './routes/roster.js'
 import applyRoutes from './routes/apply.js'
@@ -13,6 +14,8 @@ import eventsRoutes from './routes/events.js'
 import filesRoutes from './routes/files.js'
 import { seedInitialRoles } from './db.js'
 import { attachUser } from './middleware/auth.js'
+
+checkEnv()
 
 seedInitialRoles()
 console.log('Database connected, roles seeded.')
