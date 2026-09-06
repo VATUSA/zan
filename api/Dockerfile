@@ -22,8 +22,11 @@ COPY --from=dependencies --chown=node:node /app/node_modules ./node_modules
 COPY --chown=node:node . .
 # /app itself is root-owned by default (created by WORKDIR before any --chown COPY runs),
 # and better-sqlite3 needs to create zan.db as a new file directly in it - chown the
-# directory too, not just its contents.
-RUN mkdir -p uploads && chown node:node . uploads
+# directory too, not just its contents. zan.db is created empty here (rather than left for
+# better-sqlite3 to create on first boot) so that a k8s subPath volume mount targeting this
+# exact path sees a file - not a directory - already in the image and mounts a file from the
+# PVC over it instead of erroring or creating a directory in its place.
+RUN mkdir -p uploads && touch zan.db && chown node:node . uploads zan.db
 
 # zan.db and uploads/ are the app's only persistent state - both live on local disk relative
 # to WORKDIR (see db.js and routes/files.js) rather than an external database/object store.
