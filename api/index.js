@@ -42,6 +42,25 @@ app.use('/api/feedback', feedbackRoutes)
 app.use('/api/events', eventsRoutes)
 app.use('/api/files', filesRoutes)
 
+// Unmatched API routes get a JSON 404 instead of Express's default HTML page.
+app.use('/api', (req, res) => {
+  res.status(404).json({ error: 'Not found' })
+})
+
+// Last stop for anything thrown or passed to next(err) in a route above. Without this,
+// Express's built-in handler sends a full stack trace to the browser whenever NODE_ENV
+// isn't exactly "production" - which, before the previous commits, was effectively always.
+app.use((err, req, res, next) => {
+  if (res.headersSent) {
+    return next(err)
+  }
+  console.error('Unhandled error:', err)
+  if (err?.code === 'LIMIT_FILE_SIZE') {
+    return res.status(413).json({ error: 'File is too large' })
+  }
+  res.status(500).json({ error: 'Internal server error' })
+})
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })

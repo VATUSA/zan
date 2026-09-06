@@ -29,7 +29,7 @@ router.post('/callback', async (req, res) => {
     const tokenData = await tokenResponse.json()
     if (!tokenResponse.ok) {
       console.error('Token exchange failed:', tokenData)
-      return res.status(400).json({ error: 'Token exchange failed', details: tokenData })
+      return res.status(400).json({ error: 'Token exchange failed' })
     }
 
     const userResponse = await fetch('https://auth.vatsim.net/api/user', {
@@ -39,7 +39,7 @@ router.post('/callback', async (req, res) => {
     const userData = await userResponse.json()
     if (!userResponse.ok) {
       console.error('VATSIM user fetch failed:', userData)
-      return res.status(400).json({ error: 'VATSIM user fetch failed', details: userData })
+      return res.status(400).json({ error: 'VATSIM user fetch failed' })
     }
 
     const cid = userData.data.cid

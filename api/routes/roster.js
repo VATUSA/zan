@@ -29,7 +29,7 @@ router.get('/', async (req, res) => {
     const data = await response.json()
 
     if (!response.ok) {
-      return res.status(400).json({ error: 'Failed to fetch roster', details: data })
+      return res.status(400).json({ error: 'Failed to fetch roster' })
     }
 
     const allEndorsements = getAllEndorsements()
