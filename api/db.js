@@ -390,4 +390,55 @@ export function deleteFileRecord(id) {
   db.prepare('DELETE FROM files WHERE id = ?').run(id)
 }
 
+export const MEMBER_STATUSES = ['active', 'inactive']
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS member_status (
+    cid INTEGER PRIMARY KEY,
+    status TEXT NOT NULL DEFAULT 'active',
+    updated_by INTEGER,
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )
+`)
+
+export function getAllStatuses() {
+  const rows = db.prepare('SELECT cid, status FROM member_status').all()
+  const result = {}
+  for (const row of rows) result[row.cid] = row.status
+  return result
+}
+
+export function setMemberStatus(cid, status, updatedBy) {
+  db.prepare(`
+    INSERT INTO member_status (cid, status, updated_by) VALUES (?, ?, ?)
+    ON CONFLICT(cid) DO UPDATE SET
+      status = excluded.status,
+      updated_by = excluded.updated_by,
+      updated_at = datetime('now')
+  `).run(cid, status, updatedBy)
+}
+
+// bot 
+db.exec(`
+  CREATE TABLE IF NOT EXISTS discord_links (
+    cid INTEGER PRIMARY KEY,
+    discord_id TEXT NOT NULL UNIQUE,
+    linked_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )
+`)
+
+export function getDiscordLink(cid) {
+  return db.prepare('SELECT * FROM discord_links WHERE cid = ?').get(cid)
+}
+
+export function linkDiscord(cid, discordId) {
+  db.prepare(`
+    INSERT INTO discord_links (cid, discord_id) VALUES (?, ?)
+    ON CONFLICT(cid) DO UPDATE SET discord_id = excluded.discord_id, linked_at = datetime('now')
+  `).run(cid, discordId)
+}
+
+export function unlinkDiscord(cid) {
+  db.prepare('DELETE FROM discord_links WHERE cid = ?').run(cid)
+}
 export default db

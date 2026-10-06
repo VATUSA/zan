@@ -2,10 +2,11 @@ import express from 'express'
 import {
   getAllEndorsements, addEndorsement, removeEndorsement,
   getAllInitials, assignInitialsIfNeeded, seedRealInitials, setInitials, getInitials,
-  getAllRoles, addRole, removeRole,
+  getAllRoles, addRole, removeRole, getAllStatuses, setMemberStatus, MEMBER_STATUSES,
 } from '../db.js'
 import { getHighestRole } from '../utils/roles.js'
 import { requireRole } from '../middleware/auth.js'
+
 
 const router = express.Router()
 
@@ -34,6 +35,7 @@ router.get('/', async (req, res) => {
 
     const allEndorsements = getAllEndorsements()
     const allRoles = getAllRoles()
+    const allStatuses = getAllStatuses()
 
     data.data.forEach((member) => {
       // Only seed initials the FIRST time we ever see this person -
@@ -56,6 +58,8 @@ router.get('/', async (req, res) => {
       membership: member.membership,
       endorsements: allEndorsements[member.cid] || [],
       initials: allInitials[member.cid] || '??',
+      // Nobody has a status row until staff set one, so default to active
+      status: allStatuses[member.cid] || 'active',
     }))
 
     cachedRoster = roster
@@ -91,23 +95,30 @@ router.delete('/endorsements', requireRole('INS'), (req, res) => {
 })
 
 // Update someone's operating initials - staff only (INS+)
-router.put('/initials', requireRole('INS'), (req, res) => {
-  const { cid, initials } = req.body
+router.put('/status', requireRole('TA'), (req, res) => {
+  const cid = Number.parseInt(req.body.cid, 10)
+  const { status } = req.body
 
-  if (!cid || !initials) {
-    return res.status(400).json({ error: 'Missing required fields' })
+  if (!Number.isInteger(cid) || cid <= 0 || !MEMBER_STATUSES.includes(status)) {
+    return res.status(400).json({ error: 'Invalid cid or status' })
   }
 
-  const cleaned = initials.trim().toUpperCase()
-  if (!/^[A-Z]{2}$/.test(cleaned)) {
-    return res.status(400).json({ error: 'Initials must be exactly 2 letters' })
+  setMemberStatus(cid, status, req.user.cid)
+  cachedRoster = null
+  res.json({ success: true })
+})
+
+// Set a member's active/inactive status - senior staff only (TA+),
+// matching who can see the Actions tab
+router.put('/status', requireRole('TA'), (req, res) => {
+  const cid = parseCid(String(req.body.cid))
+  const { status } = req.body
+
+  if (!cid || !MEMBER_STATUSES.includes(status)) {
+    return res.status(400).json({ error: 'Invalid cid or status' })
   }
 
-  const result = setInitials(cid, cleaned)
-  if (!result.success) {
-    return res.status(409).json(result)
-  }
-
+  setMemberStatus(cid, status, req.user.cid)
   cachedRoster = null
   res.json({ success: true })
 })
