@@ -1,6 +1,4 @@
-
 import { Link } from 'react-router-dom'
-
 
 function Footer() {
   return (
@@ -17,9 +15,9 @@ function Footer() {
         </div>
         <div className="flex gap-6 flex-wrap ml-auto text-sm font-semibold">
           <Link to="/roster" className="text-muted2 hover:text-ink">Roster</Link>
-          <a href="#" className="text-muted2 hover:text-ink">Charts</a>
-          <a href="#" className="text-muted2 hover:text-ink">Discord</a>
-          <a href="#" className="text-muted2 hover:text-ink">VATUSA</a>
+          <a href="https://skyvector.com/airport/PANC/Ted-Stevens-Anchorage-International-Airport" target="_blank" rel="noopener noreferrer" className="text-muted2 hover:text-ink">Charts</a>
+          <span className="text-muted3 cursor-default">Discord</span>
+          <a href="https://www.vatusa.net" target="_blank" rel="noopener noreferrer" className="text-muted2 hover:text-ink">VATUSA</a>
         </div>
       </div>
       <div className="max-w-[1180px] mx-auto mt-9 text-xs font-semibold text-[#4E5A7A]">
