@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { useAuth } from '../context/AuthContext'
+import Weather from '../components/Weather'
 import { apiGet } from '../utils/api'
 
 function Home() {
@@ -117,6 +118,7 @@ function Home() {
                     </p>
                   </div>
                 </details>
+                
 
                 <Link
                   to="/apply"
@@ -132,8 +134,8 @@ function Home() {
                   <div className="mt-1.5 text-sm text-muted2">Any home controller S3 or above, division-wide</div>
                 </div>
                 <div className="p-6 rounded-2xl bg-white/[0.04]">
-                  <div className="text-3xl font-extrabold text-teal">No minimums</div>
-                  <div className="mt-1.5 text-sm text-muted2">No activity requirement to exercise this privilege</div>
+                  <div className="text-3xl font-extrabold text-teal">Minimums</div>
+                  <div className="mt-1.5 text-sm text-muted2">Only 2 Hours, Every 6 months!</div>
                 </div>
                 <div className="p-6 rounded-2xl bg-white/[0.04]">
                   <div className="text-3xl font-extrabold text-purple">No roster needed</div>
@@ -144,6 +146,9 @@ function Home() {
           </div>
         </div>
       </section>
+
+      {/* Weather */}
+      <Weather />
 
       {/* Airspace section (static sector cards, no live map) */}
       <section id="airspace" className="px-10 pb-28">

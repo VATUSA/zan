@@ -107,6 +107,15 @@ function RosterMember() {
     }
     refetch()
   }
+    const changeStatus = async (status) => {
+    await fetch(`${API_URL}/api/roster/status`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cid: member.cid, status }),
+    })
+    refetch()
+  }
 
   if (loading) {
     return (
@@ -146,10 +155,15 @@ function RosterMember() {
               </span>
             </h1>
             {member.role && <p className="text-muted2 mt-1">{member.role}</p>}
-            <div className="mt-3">
+                      <div className="mt-3 flex items-center gap-2">
               <span className="px-2 py-1 rounded-full bg-purple/15 text-purple text-xs font-bold font-mono">
                 {member.initials}
               </span>
+              {member.status === 'inactive' && (
+                <span className="px-2 py-1 rounded-full bg-red-500/15 text-red-300 text-xs font-bold">
+                  Inactive
+                </span>
+              )}
             </div>
           </div>
           <Link
@@ -270,13 +284,15 @@ function RosterMember() {
                   </div>
                 </div>
 
-                <div>
+                               <div>
                   <div className="text-sm font-semibold text-muted2 mb-1.5">Status</div>
                   <select
-                    disabled
-                    className="w-full rounded-lg bg-white/[0.04] border border-white/10 px-3 py-2 text-muted3"
+                    value={member.status}
+                    onChange={(e) => changeStatus(e.target.value)}
+                    className="w-full rounded-lg bg-white/[0.04] border border-white/10 px-3 py-2 text-ink"
                   >
-                    <option>Active</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
                   </select>
                 </div>
 
