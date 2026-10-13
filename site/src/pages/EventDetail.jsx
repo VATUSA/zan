@@ -5,6 +5,7 @@ import Footer from '../components/Footer'
 import { useAuth } from '../context/AuthContext'
 import { hasMinimumRole } from '../utils/roles'
 import { API_URL } from '../config'
+import { apiGet } from '../utils/api'
 
 const CATEGORIES = ['Enroute', 'TRACON', 'Local']
 
@@ -18,15 +19,12 @@ function EventDetail() {
   const [newCategory, setNewCategory] = useState('Enroute')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [actionError, setActionError] = useState(null)
 
   const isStaff = hasMinimumRole(user?.zanRole, 'EC')
 
   const load = () => {
-    fetch(`${API_URL}/api/events/${id}`, { credentials: 'include' })
-      .then((res) => {
-        if (!res.ok) throw new Error('not found')
-        return res.json()
-      })
+    apiGet(`/api/events/${id}`)
       .then((data) => {
         setEvent(data)
         setLoading(false)
@@ -36,68 +34,72 @@ function EventDetail() {
         setLoading(false)
       })
 
-    fetch(`${API_URL}/api/events/${id}/positions`, { credentials: 'include' })
-      .then((res) => res.json())
-      .then(setPositions)
-
-    fetch(`${API_URL}/api/events/${id}/signups`, { credentials: 'include' })
-      .then((res) => res.json())
-      .then(setSignups)
+    apiGet(`/api/events/${id}/positions`).then(setPositions).catch(() => setActionError('Could not load positions'))
+    apiGet(`/api/events/${id}/signups`).then(setSignups).catch(() => setActionError('Could not load signups'))
   }
 
   useEffect(load, [id, user])
 
+  // Every mutation below now checks response.ok before refreshing - the backend has started
+  // rejecting some of these with 400/403 (e.g. signing up for a position from a stale/mismatched
+  // event), and silently doing nothing on rejection just looks like the button doesn't work.
   const toggleVisibility = async () => {
-    await fetch(`${API_URL}/api/events/${id}/visibility`, {
+    const response = await fetch(`${API_URL}/api/events/${id}/visibility`, {
       method: 'PUT',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ hidden: !event.hidden }),
     })
+    if (!response.ok) return setActionError('Could not update event visibility')
     load()
   }
 
   const addPosition = async () => {
     if (!newPosition.trim()) return
-    await fetch(`${API_URL}/api/events/${id}/positions`, {
+    const response = await fetch(`${API_URL}/api/events/${id}/positions`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: newPosition.trim().toUpperCase(), category: newCategory }),
     })
+    if (!response.ok) return setActionError('Could not add position')
     setNewPosition('')
     load()
   }
 
   const removePosition = async (posId) => {
-    await fetch(`${API_URL}/api/events/${id}/positions/${posId}`, {
+    const response = await fetch(`${API_URL}/api/events/${id}/positions/${posId}`, {
       method: 'DELETE',
       credentials: 'include',
     })
+    if (!response.ok) return setActionError('Could not remove position')
     load()
   }
 
   const signUp = async (posId) => {
-    await fetch(`${API_URL}/api/events/${id}/positions/${posId}/signup`, {
+    const response = await fetch(`${API_URL}/api/events/${id}/positions/${posId}/signup`, {
       method: 'POST',
       credentials: 'include',
     })
+    if (!response.ok) return setActionError('Could not sign up for this position')
     load()
   }
 
   const approveSignup = async (signupId) => {
-    await fetch(`${API_URL}/api/events/signups/${signupId}/approve`, {
+    const response = await fetch(`${API_URL}/api/events/signups/${signupId}/approve`, {
       method: 'PUT',
       credentials: 'include',
     })
+    if (!response.ok) return setActionError('Could not approve signup')
     load()
   }
 
   const denySignup = async (signupId) => {
-    await fetch(`${API_URL}/api/events/signups/${signupId}`, {
+    const response = await fetch(`${API_URL}/api/events/signups/${signupId}`, {
       method: 'DELETE',
       credentials: 'include',
     })
+    if (!response.ok) return setActionError('Could not deny signup')
     load()
   }
 
@@ -131,6 +133,13 @@ function EventDetail() {
         <Link to="/events" className="text-sm text-muted2 hover:text-ink mb-6 inline-block">
           ← All events
         </Link>
+
+        {actionError && (
+          <p className="text-sm text-red-400 mb-6">
+            {actionError}{' '}
+            <button onClick={() => setActionError(null)} className="underline">dismiss</button>
+          </p>
+        )}
 
         {event.banner_image_url && (
           <div className="w-full max-h-[320px] overflow-hidden bg-[#101E42] rounded-2xl mb-8">
