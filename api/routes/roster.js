@@ -4,9 +4,9 @@ import {
   getAllInitials, assignInitialsIfNeeded, seedRealInitials, setInitials, getInitials,
   getAllRoles, addRole, removeRole, getAllStatuses, setMemberStatus, MEMBER_STATUSES,
 } from '../db.js'
-import { getHighestRole } from '../utils/roles.js'
+import { getHighestRole, ALL_ROLES, getRoleLevel } from '../utils/roles.js'
 import { requireRole } from '../middleware/auth.js'
-
+import { parseCid } from '../utils/validate.js'
 
 const router = express.Router()
 
@@ -30,7 +30,7 @@ router.get('/', async (req, res) => {
     const data = await response.json()
 
     if (!response.ok) {
-      return res.status(400).json({ error: 'Failed to fetch roster', details: data })
+      return res.status(400).json({ error: 'Failed to fetch roster' })
     }
 
     const allEndorsements = getAllEndorsements()
@@ -72,13 +72,17 @@ router.get('/', async (req, res) => {
   }
 })
 
+// Matches the fixed set of positions the frontend offers (RosterMember.jsx's POSITIONS).
+const ENDORSEMENT_POSITIONS = ['Unrestricted', 'Enroute', 'Oceanic']
+
 // Grant an endorsement - staff only (INS+), enforced by requireRole before this ever runs
 router.post('/endorsements', requireRole('INS'), (req, res) => {
   const { cid, position } = req.body
-  if (!cid || !position) {
-    return res.status(400).json({ error: 'Missing required fields' })
+  const targetCid = parseCid(cid)
+  if (!targetCid || !ENDORSEMENT_POSITIONS.includes(position)) {
+    return res.status(400).json({ error: 'Missing or invalid required fields' })
   }
-  addEndorsement(cid, position, req.user.cid)
+  addEndorsement(targetCid, position, req.user.cid)
   cachedRoster = null
   res.json({ success: true })
 })
@@ -86,24 +90,33 @@ router.post('/endorsements', requireRole('INS'), (req, res) => {
 // Revoke an endorsement - staff only (INS+)
 router.delete('/endorsements', requireRole('INS'), (req, res) => {
   const { cid, position } = req.body
-  if (!cid || !position) {
-    return res.status(400).json({ error: 'Missing required fields' })
+  const targetCid = parseCid(cid)
+  if (!targetCid || !ENDORSEMENT_POSITIONS.includes(position)) {
+    return res.status(400).json({ error: 'Missing or invalid required fields' })
   }
-  removeEndorsement(cid, position)
+  removeEndorsement(targetCid, position)
   cachedRoster = null
   res.json({ success: true })
 })
 
 // Update someone's operating initials - staff only (INS+)
-router.put('/status', requireRole('TA'), (req, res) => {
-  const cid = Number.parseInt(req.body.cid, 10)
-  const { status } = req.body
-
-  if (!Number.isInteger(cid) || cid <= 0 || !MEMBER_STATUSES.includes(status)) {
-    return res.status(400).json({ error: 'Invalid cid or status' })
+router.put('/initials', requireRole('INS'), (req, res) => {
+  const { cid, initials } = req.body
+  const targetCid = parseCid(cid)
+  if (!targetCid || !initials) {
+    return res.status(400).json({ error: 'Missing or invalid required fields' })
   }
 
-  setMemberStatus(cid, status, req.user.cid)
+  const cleaned = initials.trim().toUpperCase()
+  if (!/^[A-Z]{2}$/.test(cleaned)) {
+    return res.status(400).json({ error: 'Initials must be exactly 2 letters' })
+  }
+
+  const result = setInitials(targetCid, cleaned)
+  if (!result.success) {
+    return res.status(409).json(result)
+  }
+
   cachedRoster = null
   res.json({ success: true })
 })
@@ -111,25 +124,51 @@ router.put('/status', requireRole('TA'), (req, res) => {
 // Set a member's active/inactive status - senior staff only (TA+),
 // matching who can see the Actions tab
 router.put('/status', requireRole('TA'), (req, res) => {
-  const cid = parseCid(String(req.body.cid))
-  const { status } = req.body
+  const { cid, status } = req.body
+  const targetCid = parseCid(cid)
 
-  if (!cid || !MEMBER_STATUSES.includes(status)) {
+  if (!targetCid || !MEMBER_STATUSES.includes(status)) {
     return res.status(400).json({ error: 'Invalid cid or status' })
   }
 
-  setMemberStatus(cid, status, req.user.cid)
+  setMemberStatus(targetCid, status, req.user.cid)
   cachedRoster = null
   res.json({ success: true })
 })
 
+// Shared checks for granting/revoking a role: the role name has to be a real one, you can't
+// touch your own roles (no self-promotion or self-protection from demotion), and you can only
+// manage roles strictly below your own level - a DATM can't hand out ATM, and (as a documented
+// tradeoff) an ATM can't use this endpoint to hand ATM to a successor either. That handover
+// stays a manual DB operation for now rather than something any ATM can grant themselves back.
+function validateRoleChange(req, res, cid, role) {
+  const targetCid = parseCid(cid)
+  if (!targetCid || !role) {
+    res.status(400).json({ error: 'Missing or invalid required fields' })
+    return null
+  }
+  if (!ALL_ROLES.includes(role)) {
+    res.status(400).json({ error: 'Unknown role' })
+    return null
+  }
+  if (targetCid === req.user.cid) {
+    res.status(403).json({ error: "You can't change your own roles" })
+    return null
+  }
+  if (getRoleLevel(role) >= getRoleLevel(req.user.zanRole)) {
+    res.status(403).json({ error: 'You can only manage roles below your own' })
+    return null
+  }
+  return targetCid
+}
+
 // Assign a role - DATM+ only
 router.post('/roles', requireRole('DATM'), (req, res) => {
   const { cid, role } = req.body
-  if (!cid || !role) {
-    return res.status(400).json({ error: 'Missing required fields' })
-  }
-  addRole(cid, role)
+  const targetCid = validateRoleChange(req, res, cid, role)
+  if (targetCid === null) return
+
+  addRole(targetCid, role)
   cachedRoster = null
   res.json({ success: true })
 })
@@ -137,10 +176,10 @@ router.post('/roles', requireRole('DATM'), (req, res) => {
 // Remove a role - DATM+ only
 router.delete('/roles', requireRole('DATM'), (req, res) => {
   const { cid, role } = req.body
-  if (!cid || !role) {
-    return res.status(400).json({ error: 'Missing required fields' })
-  }
-  removeRole(cid, role)
+  const targetCid = validateRoleChange(req, res, cid, role)
+  if (targetCid === null) return
+
+  removeRole(targetCid, role)
   cachedRoster = null
   res.json({ success: true })
 })
