@@ -19,9 +19,15 @@ export function createSessionToken(user) {
   )
 }
 
+// Sessions issued before the login code converted the CID to a number carry it as a string.
+// Normalising it here means every request sees a number, so existing logins are fixed
+// without anyone having to sign in again.
 export function verifySessionToken(token) {
   try {
-    return jwt.verify(token, process.env.SESSION_SECRET)
+    const session = jwt.verify(token, process.env.SESSION_SECRET)
+    const cid = Number(session.cid)
+    if (!Number.isInteger(cid)) return null
+    return { ...session, cid }
   } catch {
     return null
   }
