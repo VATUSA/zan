@@ -4,6 +4,7 @@ import { getHighestRole } from '../utils/roles.js'
 import { createSessionToken, verifySessionToken } from '../utils/session.js'
 import { COOKIE_OPTIONS } from '../config.js'
 import { parseCid } from '../utils/validate.js'
+import { isVisitingZan } from '../utils/visiting.js'
 
 const router = express.Router()
 
@@ -55,7 +56,7 @@ router.post('/callback', async (req, res) => {
 
     if (vatusaResponse.ok && vatusaData.data) {
       zanRole = getHighestRole(getRoles(cid))
-      isZanVisitor = vatusaData.data.visits?.some((v) => v.facility === 'ZAN') ?? false
+      isZanVisitor = isVisitingZan(vatusaData.data)
     } else {
       console.error('VATUSA lookup failed:', vatusaData)
     }
@@ -64,7 +65,8 @@ router.post('/callback', async (req, res) => {
       cid,
       name: userData.data.personal.name_full,
       email: userData.data.personal.email,
-      rating: userData.data.vatsim.rating.long,
+      // Short code (e.g. "S3"), matching dev-login below and what the site expects to display
+      rating: userData.data.vatsim.rating.short,
       division: userData.data.vatsim.division.name,
       zanRole,
       isZanVisitor,
@@ -103,7 +105,7 @@ router.get('/dev-login/:cid', async (req, res) => {
 
     const vatusaUser = vatusaData.data
     const zanRole = getHighestRole(getRoles(cid))
-    const isZanVisitor = vatusaUser.visits?.some((v) => v.facility === 'ZAN') ?? false
+    const isZanVisitor = isVisitingZan(vatusaUser)
 
     const user = {
       cid: vatusaUser.cid,
@@ -138,7 +140,18 @@ router.get('/me', (req, res) => {
 
   const zanRole = getHighestRole(getRoles(session.cid))
 
-  res.json({ cid: session.cid, name: session.name, zanRole })
+  // Same shape as the login response, so the site looks the same after a page refresh.
+  // Sessions created before these fields were added to the token just won't have them until
+  // the member logs in again.
+  res.json({
+    cid: session.cid,
+    name: session.name,
+    email: session.email,
+    rating: session.rating,
+    division: session.division,
+    zanRole,
+    isZanVisitor: session.isZanVisitor,
+  })
 })
 
 router.post('/logout', (req, res) => {
