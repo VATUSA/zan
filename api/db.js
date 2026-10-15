@@ -272,8 +272,13 @@ export function getPendingApplications() {
   return db.prepare("SELECT * FROM applications WHERE status = 'pending' ORDER BY created_at DESC").all()
 }
 
+export function hasPendingApplication(cid) {
+  return !!db.prepare("SELECT 1 FROM applications WHERE cid = ? AND status = 'pending' LIMIT 1").get(cid)
+}
+
+// Returns how many rows changed, so callers can tell "no such application" from success.
 export function updateApplicationStatus(id, status) {
-  db.prepare('UPDATE applications SET status = ? WHERE id = ?').run(status, id)
+  return db.prepare('UPDATE applications SET status = ? WHERE id = ?').run(status, id).changes
 }
 
 // ---------- Events ----------
