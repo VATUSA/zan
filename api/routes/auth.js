@@ -1,12 +1,28 @@
 import express from 'express'
-import { getRoles } from '../db.js'
+import { getRoles, syncVatusaRoles } from '../db.js'
 import { getHighestRole } from '../utils/roles.js'
+import { extractZanRoles } from '../utils/vatusaRoles.js'
 import { createSessionToken, verifySessionToken } from '../utils/session.js'
 import { COOKIE_OPTIONS } from '../config.js'
 import { parseCid } from '../utils/validate.js'
 import { isVisitingZan } from '../utils/visiting.js'
 
 const router = express.Router()
+
+// Copies the member's ZAN roles from their VATUSA record onto this site. A failure here must
+// never stop someone logging in, so it's logged and skipped.
+function syncRolesFromVatusa(cid, vatusaUser) {
+  try {
+    const roles = extractZanRoles(vatusaUser)
+    if (roles === null) return
+    const { added, removed } = syncVatusaRoles(cid, roles)
+    if (added.length || removed.length) {
+      console.log(`Role sync for ${cid}: added [${added}] removed [${removed}]`)
+    }
+  } catch (err) {
+    console.error('Role sync failed:', err)
+  }
+}
 
 router.post('/callback', async (req, res) => {
   const { code } = req.body
@@ -51,15 +67,19 @@ router.post('/callback', async (req, res) => {
     )
     const vatusaData = await vatusaResponse.json()
 
-    let zanRole = null
     let isZanVisitor = false
 
     if (vatusaResponse.ok && vatusaData.data) {
-      zanRole = getHighestRole(getRoles(cid))
       isZanVisitor = isVisitingZan(vatusaData.data)
+      syncRolesFromVatusa(cid, vatusaData.data)
     } else {
       console.error('VATUSA lookup failed:', vatusaData)
     }
+
+    // Read after the sync so a role just granted in VATUSA shows up on this very login. Also
+    // read when the VATUSA lookup failed (e.g. sandbox test accounts that aren't real VATUSA
+    // members), so roles added by hand still apply instead of showing as none until a refresh.
+    const zanRole = getHighestRole(getRoles(cid))
 
     const user = {
       cid,
@@ -104,6 +124,7 @@ router.get('/dev-login/:cid', async (req, res) => {
     }
 
     const vatusaUser = vatusaData.data
+    syncRolesFromVatusa(cid, vatusaUser)
     const zanRole = getHighestRole(getRoles(cid))
     const isZanVisitor = isVisitingZan(vatusaUser)
 
