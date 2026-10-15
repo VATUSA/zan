@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
-function Dropdown({ label, children }) {
+// variant="badge" drops the pill styling and chevron so a custom label (the account badge)
+// can be the whole button.
+function Dropdown({ label, children, variant }) {
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
 
@@ -19,16 +21,23 @@ function Dropdown({ label, children }) {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-muted hover:text-ink hover:bg-white/[0.07] text-[14.5px] font-semibold"
+        aria-expanded={open}
+        className={
+          variant === 'badge'
+            ? 'flex items-center ml-2 rounded-xl hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold'
+            : 'flex items-center gap-1.5 px-3.5 py-2 rounded-full text-muted hover:text-ink hover:bg-white/[0.07] text-[14.5px] font-semibold'
+        }
       >
         {label}
-        <svg
-          className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-180' : ''}`}
-          viewBox="0 0 12 8"
-          fill="none"
-        >
-          <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+        {variant !== 'badge' && (
+          <svg
+            className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-180' : ''}`}
+            viewBox="0 0 12 8"
+            fill="none"
+          >
+            <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        )}
       </button>
 
       {open && (

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import { UserIdCard } from '../components/UserBadge'
 import { useAuth } from '../context/AuthContext'
 import { Link } from 'react-router-dom'
 import { apiGet } from '../utils/api'
@@ -38,14 +39,8 @@ function Profile() {
         <p className="text-muted mb-10">Your VATSIM and ZAN membership details.</p>
 
         <div className="rounded-2xl bg-white/[0.04] p-8 mb-6">
-          <div className="flex items-center gap-5 mb-8">
-            <div className="w-16 h-16 rounded-full bg-gold/15 grid place-items-center text-2xl font-extrabold text-gold">
-              {user.name?.charAt(0)}
-            </div>
-            <div>
-              <div className="text-2xl font-extrabold tracking-tight">{user.name}</div>
-              <div className="text-muted2 text-sm">CID: {user.cid}</div>
-            </div>
+          <div className="mb-8">
+            <UserIdCard user={user} />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">

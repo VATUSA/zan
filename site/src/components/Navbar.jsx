@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { hasMinimumRole } from '../utils/roles'
 import Dropdown, { DropdownItem } from './Dropdown'
+import UserBadge from './UserBadge'
 
 function Navbar() {
   const { user, loading, loginWithVatsim, loginAsDev, logout } = useAuth()
@@ -33,19 +34,7 @@ function Navbar() {
           </Dropdown>
 
           {user && (
-            <Dropdown
-              label={
-                <span className="text-left leading-tight">
-                  <span className="block text-[10px] font-bold text-gold uppercase tracking-wide">Welcome back</span>
-                  <span className="block font-extrabold">{user.name}</span>
-                  <span className="flex items-center gap-2 mt-0.5 text-[11px] font-normal text-muted2 normal-case">
-                    <span>CID {user.cid}</span>
-                    <span className="px-1.5 py-0.5 rounded-full bg-gold/15 text-gold font-bold">{user.rating}</span>
-                    {user.zanRole && <span className="text-teal font-semibold">{user.zanRole}</span>}
-                  </span>
-                </span>
-              }
-            >
+            <Dropdown variant="badge" label={<UserBadge user={user} />}>
               <DropdownItem to="/profile">Profile</DropdownItem>
               {isTaPlus && <DropdownItem to="/staff-dashboard">Staff Dashboard</DropdownItem>}
               <div className="border-t border-white/10 my-1" />

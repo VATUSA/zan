@@ -23,17 +23,6 @@ function formatCeiling(clouds) {
   return layer ? `${layer.cover} ${layer.base.toLocaleString()} ft` : 'No ceiling'
 }
 
-function formatTempDew(m) {
-  if (m.temp == null || m.dewp == null) return '—'
-  return `${Math.round(m.temp)}° / ${Math.round(m.dewp)}°C`
-}
-
-// The API gives pressure in hectopascals; US pilots expect inches of mercury
-function formatAltimeter(altim) {
-  if (altim == null) return '—'
-  return `${(altim * 0.02953).toFixed(2)} inHg`
-}
-
 function formatAge(obsTime) {
   const mins = Math.max(0, Math.round((Date.now() / 1000 - obsTime) / 60))
   if (mins < 60) return `Observed ${mins} min ago`
@@ -65,29 +54,26 @@ function Weather() {
   }, [])
 
   return (
-    <section className="px-6 sm:px-10 pb-28">
+    <section className="px-6 sm:px-10 pb-20">
       <div className="max-w-[1180px] mx-auto">
         <div className="flex items-baseline gap-5 flex-wrap">
-          <h2 className="font-extrabold leading-tight tracking-tight text-[clamp(28px,3.4vw,44px)]">
+          <h2 className="font-extrabold leading-tight tracking-tight text-[clamp(28px,3vw,40px)]">
             Weather across the FIR
           </h2>
-          <span className="ml-auto text-xs font-semibold text-muted3">Source: NOAA Aviation Weather Center</span>
+          <span className="ml-auto text-xs font-semibold text-muted2">Live METARs · NOAA Aviation Weather Center</span>
         </div>
-        <p className="max-w-[52ch] mt-4 text-muted leading-relaxed">
-          Live METARs from the airports around Anchorage airspace.
-        </p>
 
-        {loading && <p className="text-muted2 mt-9">Loading weather...</p>}
+        {loading && <p className="text-muted2 mt-7">Loading weather...</p>}
 
         {!loading && reports.length === 0 && (
-          <p className="text-muted2 mt-9">
+          <p className="text-muted2 mt-7">
             {error ? 'Weather is unavailable right now.' : 'No recent reports available.'}
           </p>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-9">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mt-6">
           {reports.map((m) => (
-            <div key={m.icaoId} className="rounded-2xl bg-white/[0.04] p-5">
+            <div key={m.icaoId} className="rounded-[20px] bg-white/[0.04] px-[22px] py-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <div className="font-mono font-bold text-lg">{m.icaoId}</div>
@@ -104,8 +90,6 @@ function Weather() {
                 <Row label="Wind" value={formatWind(m)} />
                 <Row label="Vis" value={m.visib != null ? `${m.visib} SM` : '—'} />
                 <Row label="Ceiling" value={formatCeiling(m.clouds)} />
-                <Row label="Temp / Dew" value={formatTempDew(m)} />
-                <Row label="Altimeter" value={formatAltimeter(m.altim)} />
               </div>
 
               {m.wxString && <div className="mt-3 text-xs font-bold text-gold">{m.wxString}</div>}
