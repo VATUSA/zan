@@ -1,4 +1,5 @@
 import Database from 'better-sqlite3'
+import { planRoleSync } from './utils/vatusaRoles.js'
 
 const db = new Database('zan.db')
 
@@ -172,9 +173,17 @@ db.exec(`
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     cid INTEGER NOT NULL,
     role TEXT NOT NULL,
+    source TEXT NOT NULL DEFAULT 'manual',
     UNIQUE(cid, role)
   )
 `)
+
+// Databases created before role syncing existed don't have the `source` column yet.
+// 'manual' = added by hand (seeded, role manager, direct edit); 'vatusa' = added by the
+// login sync, and the only kind the sync is allowed to remove again.
+if (!db.prepare('PRAGMA table_info(roles)').all().some((c) => c.name === 'source')) {
+  db.exec("ALTER TABLE roles ADD COLUMN source TEXT NOT NULL DEFAULT 'manual'")
+}
 
 export function getRoles(cid) {
   const rows = db.prepare('SELECT role FROM roles WHERE cid = ?').all(cid)
@@ -197,6 +206,21 @@ export function addRole(cid, role) {
 
 export function removeRole(cid, role) {
   db.prepare('DELETE FROM roles WHERE cid = ? AND role = ?').run(cid, role)
+}
+
+// Mirrors a member's ZAN roles from VATUSA onto this site (see planRoleSync for the rules).
+export function syncVatusaRoles(cid, vatusaRoles) {
+  const existing = db.prepare('SELECT role, source FROM roles WHERE cid = ?').all(cid)
+  const { toAdd, toRemove } = planRoleSync(existing, vatusaRoles)
+
+  const insert = db.prepare("INSERT OR IGNORE INTO roles (cid, role, source) VALUES (?, ?, 'vatusa')")
+  const remove = db.prepare("DELETE FROM roles WHERE cid = ? AND role = ? AND source = 'vatusa'")
+  db.transaction(() => {
+    for (const role of toAdd) insert.run(cid, role)
+    for (const role of toRemove) remove.run(cid, role)
+  })()
+
+  return { added: toAdd, removed: toRemove }
 }
 
 export function seedInitialRoles() {
