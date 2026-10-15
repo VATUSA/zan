@@ -60,7 +60,13 @@ router.post('/callback', async (req, res) => {
       return res.status(400).json({ error: 'VATSIM user fetch failed' })
     }
 
-    const cid = userData.data.cid
+    // VATSIM Connect sends the CID as a string ("1234567"). Everywhere else in the API a CID is
+    // a number (parseCid, the database, strict === checks), so convert it once, here.
+    const cid = parseCid(userData.data.cid)
+    if (!cid) {
+      console.error('VATSIM returned an unusable CID:', userData.data.cid)
+      return res.status(400).json({ error: 'VATSIM returned an invalid CID' })
+    }
 
     const vatusaResponse = await fetch(
       `https://api.vatusa.net/v2/user/${cid}?apikey=${process.env.VATUSA_API_KEY}`
