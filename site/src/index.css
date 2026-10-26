@@ -1,0 +1,18 @@
+  @tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+
+  @keyframes aurA {
+    0% { transform: translate3d(-4%, 0, 0) scaleY(1); opacity: .5; }
+    50% { transform: translate3d(8%, 4%, 0) scaleY(1.25); opacity: .85; }
+    100% { transform: translate3d(-4%, 0, 0) scaleY(1); opacity: .5; }
+  }
+  @keyframes aurB {
+    0% { transform: translate3d(6%, 3%, 0) scaleY(1.1); opacity: .7; }
+    50% { transform: translate3d(-7%, -2%, 0) scaleY(.85); opacity: .35; }
+    100% { transform: translate3d(6%, 3%, 0) scaleY(1.1); opacity: .7; }
+  }
+  @keyframes livedot {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(63,217,168,.5); }
+    70% { box-shadow: 0 0 0 7px rgba(63,217,168,0); }
+  }
