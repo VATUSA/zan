@@ -1,0 +1,65 @@
+services:
+  api:
+    build:
+      context: ./api
+    ports:
+      - "4000:4000"
+    environment:
+      # VATSIM Connect OAuth
+      VATSIM_CLIENT_ID: ${VATSIM_CLIENT_ID:?}
+      VATSIM_CLIENT_SECRET: ${VATSIM_CLIENT_SECRET:?}
+      # Must match the VATSIM Connect environment the site's VITE_VATSIM_AUTH_URL points
+      # at (auth-dev.vatsim.net for sandbox, auth.vatsim.net for production), or the
+      # token exchange fails with invalid_client.
+      VATSIM_TOKEN_URL: ${VATSIM_TOKEN_URL:-https://auth.vatsim.net/oauth/token}
+
+      # Discord OAuth for account linking (routes/discord.js). Optional - the api boots
+      # without these, but /api/discord won't work until they're set.
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID:-}
+      DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET:-}
+      DISCORD_REDIRECT_URI: ${DISCORD_REDIRECT_URI:-}
+
+      # VATUSA API
+      VATUSA_API_KEY: ${VATUSA_API_KEY:?}
+
+      # Session signing secret - generate with:
+      # node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+      SESSION_SECRET: ${SESSION_SECRET:?}
+
+      # production disables dev-login and enables secure cookies - keep this as
+      # 'development' for a local Compose stack served over plain http.
+      NODE_ENV: ${API_NODE_ENV:-development}
+
+      # The frontend's URL, for CORS - must match the site service below.
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      FRONTEND_REDIRECT_URI: ${FRONTEND_REDIRECT_URI:-http://localhost:5173/}
+
+      PORT: 4000
+
+      # No reverse proxy in front of this service in local Compose.
+      TRUST_PROXY_HOPS: ${TRUST_PROXY_HOPS:-0}
+    volumes:
+      # zan.db and uploads/ are the api's only persistent state (see api/db.js and
+      # api/routes/files.js) - bind-mount both so data survives container restarts/rebuilds.
+      - ./api/zan.db:/app/zan.db
+      - ./api/uploads:/app/uploads
+    restart: unless-stopped
+
+  site:
+    build:
+      context: ./site
+    ports:
+      - "3000:80"
+    environment:
+      # Read at container startup by docker-entrypoint.d/40-env-config.sh, not at build
+      # time - see site/env.example.
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:4000}
+      VITE_VATSIM_AUTH_URL: ${VITE_VATSIM_AUTH_URL:-https://auth-dev.vatsim.net/oauth/authorize}
+      VITE_VATSIM_CLIENT_ID: ${VITE_VATSIM_CLIENT_ID:?}
+      # Must exactly match the api's FRONTEND_REDIRECT_URI above, or VATSIM's token
+      # exchange rejects a mismatched redirect_uri. Left unset to fall back to this
+      # site's own origin + "/", which is correct for most setups.
+      VITE_VATSIM_REDIRECT_URI: ${VITE_VATSIM_REDIRECT_URI:-}
+    depends_on:
+      - api
+    restart: unless-stopped
