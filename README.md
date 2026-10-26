@@ -46,8 +46,8 @@ production), and the site's redirect URI must exactly match the API's
 
 ## Persistent state
 
-The API stores everything in `api/zan.db` (SQLite, schema created on startup in `api/db.js`)
-and `api/uploads/`. Compose bind-mounts both.
+The API stores everything in a SQLite database (`DB_PATH`, default `api/zan.db`; schema
+created on startup in `api/db.js`) and `api/uploads/`. Compose bind-mounts both.
 
 ## Deployment
 

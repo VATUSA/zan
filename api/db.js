@@ -1,7 +1,9 @@
 import Database from 'better-sqlite3'
 import { planRoleSync } from './utils/vatusaRoles.js'
 
-const db = new Database('zan.db')
+// DB_PATH lets a deployment keep the database (and SQLite's -journal file next to it) in a
+// mounted directory. Defaults to ./zan.db for local use.
+const db = new Database(process.env.DB_PATH || 'zan.db')
 
 // ---------- Endorsements ----------
 db.exec(`

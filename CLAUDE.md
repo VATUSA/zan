@@ -30,7 +30,9 @@ for setup and env vars.
   `development` for plain-http local use.
 - `TRUST_PROXY_HOPS` controls how far the rate limiter trusts `X-Forwarded-For`. Set it to
   the real number of proxies in front of the api.
-- `api/zan.db` and `api/uploads/` are the only persistent state.
+- The SQLite database (`DB_PATH`, default `api/zan.db`) and `api/uploads/` are the only
+  persistent state. In k8s the database lives in a mounted directory (`/app/data`), never a
+  single-file subPath mount: subPath creates a directory when the file is missing on the volume.
 - Both Dockerfiles build with the repo root as the context, because the shared gitops build
   workflow always uses `.`. That means `COPY` paths are `api/...` or `site/...`, and the
   root `.dockerignore` covers both images. Workflows are in the root `.github/workflows/`.

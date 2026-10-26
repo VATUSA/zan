@@ -20,19 +20,17 @@ FROM base AS app
 ENV NODE_ENV=production
 COPY --from=dependencies --chown=node:node /app/node_modules ./node_modules
 COPY --chown=node:node api/ .
-# /app itself is root-owned by default (created by WORKDIR before any --chown COPY runs),
-# and better-sqlite3 needs to create zan.db as a new file directly in it - chown the
-# directory too, not just its contents. zan.db is created empty here (rather than left for
-# better-sqlite3 to create on first boot) so that a k8s subPath volume mount targeting this
-# exact path sees a file - not a directory - already in the image and mounts a file from the
-# PVC over it instead of erroring or creating a directory in its place.
-RUN mkdir -p uploads && touch zan.db && chown node:node . uploads zan.db
+# /app itself is root-owned by default (created by WORKDIR before any --chown COPY runs).
+# better-sqlite3 creates zan.db (and its -journal file) in whatever directory DB_PATH points
+# at, so that directory must be writable by the node user. data/ is meant for a volume mount
+# with DB_PATH=/app/data/zan.db. /app itself stays writable for the ./zan.db default.
+RUN mkdir -p uploads data && chown node:node . uploads data
 
-# zan.db and uploads/ are the app's only persistent state - both live on local disk relative
-# to WORKDIR (see db.js and routes/files.js) rather than an external database/object store.
-# Mount durable storage over /app/zan.db and /app/uploads in production, or data is lost on
-# every redeploy/restart.
-VOLUME ["/app/uploads"]
+# The database and uploads/ are the app's only persistent state - both live on local disk
+# (see db.js and routes/files.js) rather than an external database/object store. In
+# production, mount durable storage over /app/data (with DB_PATH=/app/data/zan.db) and
+# /app/uploads, or data is lost on every redeploy/restart.
+VOLUME ["/app/data", "/app/uploads"]
 
 USER node
 EXPOSE 4000
