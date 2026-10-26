@@ -1,0 +1,31 @@
+name: CI to Staging
+on:
+  push:
+    branches: [main]
+jobs:
+  common-build-api:
+    uses: vatusa/gitops/.github/workflows/common-build.yml@main
+    with:
+      image-name: "zan-api"
+      relative-path: "api/"
+    secrets: inherit
+  common-dev-ci-api:
+    uses: vatusa/gitops/.github/workflows/common-dev-ci.yml@main
+    needs: common-build-api
+    with:
+      image-name: "zan-api"
+      kustomization-folder: "zan"
+    secrets: inherit
+  common-build-site:
+    uses: vatusa/gitops/.github/workflows/common-build.yml@main
+    with:
+      image-name: "zan-site"
+      relative-path: "site/"
+    secrets: inherit
+  common-dev-ci-site:
+    uses: vatusa/gitops/.github/workflows/common-dev-ci.yml@main
+    needs: [common-build-site, common-dev-ci-api]
+    with:
+      image-name: "zan-site"
+      kustomization-folder: "zan"
+    secrets: inherit

@@ -1,7 +1,8 @@
 services:
   api:
     build:
-      context: ./api
+      context: .
+      dockerfile: api/Dockerfile
     ports:
       - "4000:4000"
     environment:
@@ -47,7 +48,8 @@ services:
 
   site:
     build:
-      context: ./site
+      context: .
+      dockerfile: site/Dockerfile
     ports:
       - "3000:80"
     environment:

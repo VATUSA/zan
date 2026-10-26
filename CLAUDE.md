@@ -31,8 +31,9 @@ for setup and env vars.
 - `TRUST_PROXY_HOPS` controls how far the rate limiter trusts `X-Forwarded-For`. Set it to
   the real number of proxies in front of the api.
 - `api/zan.db` and `api/uploads/` are the only persistent state.
-- The per-app `.github/workflows/` directories are inert in this combined repo, because
-  GitHub only reads the root `.github/workflows/`.
+- Both Dockerfiles build with the repo root as the context, because the shared gitops build
+  workflow always uses `.`. That means `COPY` paths are `api/...` or `site/...`, and the
+  root `.dockerignore` covers both images. Workflows are in the root `.github/workflows/`.
 
 ## History
 

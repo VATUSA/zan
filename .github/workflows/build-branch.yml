@@ -1,0 +1,46 @@
+name: Build Branch Image
+
+# Build and push vatusa/zan-api and/or vatusa/zan-site (:<sha> and :branch-<name>) from any branch except
+# the default one, for testing unmerged work. Never moves :latest, never deploys, and prod releases are
+# gated separately.
+#   gh workflow run build-branch.yml --ref my-branch [-f apps=api] [-f platforms=linux/amd64]
+# The branch must contain this file; merge the default branch into older branches first.
+# Use ci-master.yml (automatic on push) for the default branch.
+on:
+  workflow_dispatch:
+    inputs:
+      apps:
+        description: 'Which image(s) to build'
+        type: choice
+        options: [both, api, site]
+        default: both
+      platforms:
+        description: 'Target platforms'
+        required: false
+        default: 'linux/amd64,linux/arm64'
+
+# A newer dispatch on the same branch supersedes an older one.
+concurrency:
+  group: build-branch-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-api:
+    if: github.ref_name != github.event.repository.default_branch && inputs.apps != 'site'
+    uses: vatusa/gitops/.github/workflows/common-build.yml@main
+    with:
+      image-name: 'zan-api'
+      relative-path: 'api/'
+      platforms: ${{ inputs.platforms }}
+    secrets: inherit
+  build-site:
+    if: github.ref_name != github.event.repository.default_branch && inputs.apps != 'api'
+    uses: vatusa/gitops/.github/workflows/common-build.yml@main
+    with:
+      image-name: 'zan-site'
+      relative-path: 'site/'
+      platforms: ${{ inputs.platforms }}
+    secrets: inherit

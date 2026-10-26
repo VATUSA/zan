@@ -51,11 +51,17 @@ and `api/uploads/`. Compose bind-mounts both.
 
 ## Deployment
 
-- `zan.service` is a systemd unit that runs the Compose stack from `/srv/zan`.
-- `api/.github/workflows` and `site/.github/workflows` call the shared VATUSA gitops
-  workflows to build the `zan-api` and `zan-site` images. GitHub only runs workflows from
-  the repo-root `.github/workflows/`, so these won't run until they are moved there and
-  scoped per app.
+CI uses the shared VATUSA gitops workflows, the same way the other VATUSA repos do. The
+images are `vatusa/zan-api` and `vatusa/zan-site`, and the kustomization folder is `zan`:
+
+- `ci-master.yml`: every push to `main` builds both images (`:<sha>` and `:latest`) and
+  bumps the `zan/overlays/dev` image tags in gitops.
+- `prod-release.yml`: run manually to point `zan/overlays/prod` at an already-built commit.
+- `build-branch.yml`: run manually to build `:<sha>` and `:branch-<name>` images from a
+  non-default branch, without deploying anything.
+
+Both images build with the repo root as the context (`docker build -f api/Dockerfile .`), so
+the root `.dockerignore` applies to both.
 
 ## License
 

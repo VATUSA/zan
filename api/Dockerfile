@@ -13,13 +13,13 @@ FROM base AS dependencies
 # it from source via node-gyp, which needs a C++ toolchain and Python.
 RUN apt-get update && apt-get install -y --no-install-recommends python3 make g++ \
     && rm -rf /var/lib/apt/lists/*
-COPY package.json package-lock.json ./
+COPY api/package.json api/package-lock.json ./
 RUN npm ci --omit=dev
 
 FROM base AS app
 ENV NODE_ENV=production
 COPY --from=dependencies --chown=node:node /app/node_modules ./node_modules
-COPY --chown=node:node . .
+COPY --chown=node:node api/ .
 # /app itself is root-owned by default (created by WORKDIR before any --chown COPY runs),
 # and better-sqlite3 needs to create zan.db as a new file directly in it - chown the
 # directory too, not just its contents. zan.db is created empty here (rather than left for

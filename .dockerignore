@@ -1,0 +1,14 @@
+# Both images build with the repo root as context (the shared gitops build workflow always
+# uses context "."), so this file covers api/ and site/.
+.git
+.github
+**/.gitignore
+**/*.md
+**/node_modules
+**/npm-debug.log
+**/.env
+**/.env.*
+!**/.env.example
+site/dist
+api/zan.db
+api/uploads

@@ -1,0 +1,21 @@
+name: Production Release
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: 'Commit SHA to checkout (optional)'
+        required: false
+        default: ''
+jobs:
+  common-release-api:
+    uses: vatusa/gitops/.github/workflows/common-release.yml@main
+    with:
+      image-name: 'zan-api'
+      kustomization-folder: 'zan'
+    secrets: inherit
+  common-release-site:
+    uses: vatusa/gitops/.github/workflows/common-release.yml@main
+    with:
+      image-name: 'zan-site'
+      kustomization-folder: 'zan'
+    secrets: inherit
