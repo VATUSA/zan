@@ -61,7 +61,7 @@ function UserSearch() {
           <Link
             key={m.cid}
             to={`/roster/member/${m.cid}`}
-            className="flex items-center justify-between gap-4 rounded-xl bg-white/[0.04] hover:bg-white/[0.07] px-5 py-3.5 transition-colors"
+            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 rounded-xl bg-white/[0.04] hover:bg-white/[0.07] px-5 py-3.5 transition-colors"
           >
             <div>
               <div className="font-semibold">
@@ -73,7 +73,7 @@ function UserSearch() {
                 {m.endorsements.length > 0 && ` · ${m.endorsements.join(', ')}`}
               </div>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
               {m.initials && (
                 <span className="text-xs font-bold px-2 py-1 rounded-full bg-purple/15 text-purple font-mono">
                   {m.initials}

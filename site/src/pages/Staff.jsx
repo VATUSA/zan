@@ -35,29 +35,29 @@ function Staff() {
     <div className="min-h-screen bg-navy text-ink font-mulish">
       <Navbar />
 
-      <div className="max-w-[1000px] mx-auto px-10 py-16">
-        <h1 className="text-4xl font-extrabold tracking-tight mb-2">Staff</h1>
-        <p className="text-muted mb-16">The team behind Anchorage ARTCC.</p>
+      <div className="max-w-[1000px] mx-auto px-6 sm:px-10 py-10 sm:py-16">
+        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2">Staff</h1>
+        <p className="text-muted mb-10 sm:mb-16">The team behind Anchorage ARTCC.</p>
 
         {loading && <p className="text-muted2">Loading staff...</p>}
         {error && <p className="text-red-400">{error}</p>}
 
         {!loading && !error && (
-          <div className="space-y-16">
+          <div className="space-y-10 sm:space-y-16">
             {/* Tier 1: ATM */}
             <div className="flex justify-center">
               <RoleCard node={HIERARCHY} members={membersForRole(HIERARCHY.role)} tier={1} />
             </div>
 
             {/* Tier 2: DATM / TA */}
-            <div className="grid grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-8">
               {HIERARCHY.children.map((branch) => (
                 <div key={branch.role} className="space-y-6">
                   <RoleCard node={branch} members={membersForRole(branch.role)} tier={2} />
 
                   {/* Tier 3: reports under this branch */}
                   {branch.children && (
-                    <div className="grid gap-3 pl-6 border-l-2 border-white/10">
+                    <div className="grid gap-3 pl-4 sm:pl-6 border-l-2 border-white/10">
                       {branch.children.map((leaf) => (
                         <RoleCard
                           key={leaf.role}
@@ -82,7 +82,7 @@ function Staff() {
 
 function RoleCard({ node, members, tier }) {
   const styles = {
-    1: 'px-10 py-6 min-w-[280px] border-gold/30 bg-gold/[0.06]',
+    1: 'px-6 sm:px-10 py-6 w-full sm:w-auto sm:min-w-[280px] border-gold/30 bg-gold/[0.06]',
     2: 'px-7 py-5 border-white/10 bg-white/[0.04]',
     3: 'px-5 py-3.5 border-white/10 bg-white/[0.03]',
   }

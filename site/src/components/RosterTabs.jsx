@@ -6,10 +6,10 @@ function RosterTabs() {
   const isVisiting = location.pathname === '/roster/visiting'
 
   return (
-    <div className="flex border-b border-white/10 mb-8">
+    <div className="flex border-b border-white/10 mb-8 overflow-x-auto whitespace-nowrap">
       <Link
         to="/roster/home"
-        className={`px-6 py-4 font-bold text-sm border-b-2 -mb-px ${
+        className={`flex-1 sm:flex-none text-center px-3 sm:px-6 py-4 font-bold text-[13px] sm:text-sm border-b-2 -mb-px ${
           isHome ? 'border-gold text-ink' : 'border-transparent text-muted2 hover:text-ink'
         }`}
       >
@@ -17,7 +17,7 @@ function RosterTabs() {
       </Link>
       <Link
         to="/roster/visiting"
-        className={`px-6 py-4 font-bold text-sm border-b-2 -mb-px ${
+        className={`flex-1 sm:flex-none text-center px-3 sm:px-6 py-4 font-bold text-[13px] sm:text-sm border-b-2 -mb-px ${
           isVisiting ? 'border-gold text-ink' : 'border-transparent text-muted2 hover:text-ink'
         }`}
       >

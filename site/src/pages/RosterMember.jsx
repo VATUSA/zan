@@ -145,12 +145,12 @@ function RosterMember() {
     <div className="min-h-screen bg-navy text-ink font-mulish">
       <Navbar />
 
-      <div className="max-w-[900px] mx-auto px-10 py-14">
-        <div className="flex items-start justify-between mb-6">
+      <div className="max-w-[900px] mx-auto px-6 sm:px-10 py-10 sm:py-14">
+        <div className="flex flex-col-reverse sm:flex-row items-start sm:justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight break-words">
               {member.fname} {member.lname}
-              <span className="text-muted3 font-normal text-xl ml-2">
+              <span className="block sm:inline text-muted3 font-normal text-lg sm:text-xl sm:ml-2">
                 ({member.cid}/{member.rating})
               </span>
             </h1>
@@ -174,7 +174,7 @@ function RosterMember() {
           </Link>
         </div>
 
-        <div className="flex gap-2 mb-8">
+        <div className="flex flex-wrap gap-2 mb-8">
           {member.endorsements.map((e) => (
             <span key={e} className="px-3 py-1 rounded-full bg-teal/15 text-teal text-xs font-bold">
               {e}
@@ -182,12 +182,12 @@ function RosterMember() {
           ))}
         </div>
 
-        <div className="flex border-b border-white/10 mb-8">
+        <div className="flex border-b border-white/10 mb-8 overflow-x-auto whitespace-nowrap">
           {TABS.map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-5 py-3 font-bold text-sm uppercase tracking-wide border-b-2 -mb-px ${
+              className={`px-4 sm:px-5 py-3 font-bold text-xs sm:text-sm uppercase tracking-wide border-b-2 -mb-px ${
                 tab === t ? 'border-gold text-ink' : 'border-transparent text-muted2 hover:text-ink'
               }`}
             >
@@ -208,7 +208,7 @@ function RosterMember() {
 
             <h2 className="text-xl font-extrabold tracking-tight mb-4">Certifications</h2>
             {endorsementError && <p className="text-sm text-red-400 mb-3">{endorsementError}</p>}
-            <div className="grid grid-cols-2 gap-5 max-w-[500px]">
+            <div className="grid grid-cols-1 min-[420px]:grid-cols-3 gap-5 max-w-[500px]">
               {POSITIONS.map((pos) => {
                 const has = member.endorsements.includes(pos)
                 return (
@@ -259,7 +259,7 @@ function RosterMember() {
           <div className="space-y-10">
             <div>
               <h2 className="text-xl font-extrabold tracking-tight mb-5">Actions</h2>
-              <div className="grid grid-cols-2 gap-x-8 gap-y-5 max-w-[700px]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5 max-w-[700px]">
                 <div>
                   <div className="text-sm font-semibold text-muted2 mb-1.5">Type</div>
                   <div className="rounded-lg bg-white/[0.04] border border-white/10 px-3 py-2 text-ink">
@@ -269,11 +269,11 @@ function RosterMember() {
 
                 <div>
                   <div className="text-sm font-semibold text-muted2 mb-1.5">Removal Reason</div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 min-w-0">
                     <input
                       disabled
                       placeholder="Coming soon"
-                      className="flex-1 rounded-lg bg-white/[0.04] border border-white/10 px-3 py-2 text-muted3 placeholder:text-muted3"
+                      className="flex-1 min-w-0 rounded-lg bg-white/[0.04] border border-white/10 px-3 py-2 text-muted3 placeholder:text-muted3"
                     />
                     <button
                       disabled
@@ -350,12 +350,12 @@ function RosterMember() {
                   <span className="text-muted3 text-sm">No roles</span>
                 )}
               </div>
-              <div className="flex items-center gap-2 max-w-[400px]">
+              <div className="flex items-center gap-2 max-w-[400px] min-w-0">
                 <span className="text-sm font-semibold text-muted2 whitespace-nowrap">Add Role:</span>
                 <select
                   value={newRole}
                   onChange={(e) => setNewRole(e.target.value)}
-                  className="flex-1 rounded-lg bg-white/[0.04] border border-white/10 px-3 py-2 text-ink"
+                  className="flex-1 min-w-0 rounded-lg bg-white/[0.04] border border-white/10 px-3 py-2 text-ink"
                 >
                   <option value="">Select a role...</option>
                   {ALL_ROLES.filter((r) => r !== member.role).map((r) => (

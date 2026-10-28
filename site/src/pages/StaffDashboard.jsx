@@ -56,13 +56,13 @@ function StaffDashboard() {
     <div className="min-h-screen bg-navy text-ink font-mulish">
       <Navbar />
 
-      <div className="max-w-[1000px] mx-auto px-6 sm:px-10 py-16">
-        <h1 className="text-4xl font-extrabold tracking-tight mb-2">Staff Dashboard</h1>
+      <div className="max-w-[1000px] mx-auto px-6 sm:px-6 sm:px-10 py-10 sm:py-16">
+        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2">Staff Dashboard</h1>
         <p className="text-muted mb-10">Command center for ARTCC staff.</p>
 
         {error && <p className="text-red-400 mb-8">{error}</p>}
 
-        <div className="flex border-b border-white/10 mb-10">
+        <div className="flex border-b border-white/10 mb-8 sm:mb-10">
           {TABS.map((t) => (
             <button
               key={t}
@@ -81,7 +81,7 @@ function StaffDashboard() {
         {tab === 'overview' && (
           <>
             {stats && (
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-14">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-10 sm:mb-14 [&>*:last-child:nth-child(odd)]:col-span-2 sm:[&>*:last-child:nth-child(odd)]:col-span-1">
                 <StatCard label="Home" value={stats.homeMembers} />
                 <StatCard label="Visiting" value={stats.visitingMembers} />
                 <StatCard label="Staff" value={stats.staffCount} />
@@ -90,14 +90,14 @@ function StaffDashboard() {
               </div>
             )}
 
-            <section className="mb-16">
+            <section className="mb-12 sm:mb-16">
               <h2 className="text-xl font-extrabold tracking-tight mb-5">
                 Pending Applications <span className="text-muted2 font-normal">({applications.length})</span>
               </h2>
               {applications.length === 0 && <p className="text-muted2">No pending applications.</p>}
               <div className="space-y-3">
                 {applications.map((a) => (
-                  <div key={a.id} className="rounded-xl bg-white/[0.04] p-5 flex items-start justify-between gap-4">
+                  <div key={a.id} className="rounded-xl bg-white/[0.04] p-5 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                     <div>
                       <div className="font-bold">
                         {a.fname} {a.lname} <span className="text-muted3 font-normal">({a.cid}/{a.rating})</span>
@@ -105,7 +105,7 @@ function StaffDashboard() {
                       <div className="text-sm text-muted2 mt-1">From {a.facility}</div>
                       {a.reason && <p className="text-sm mt-2 max-w-[500px]">{a.reason}</p>}
                     </div>
-                    <div className="flex gap-2 shrink-0">
+                    <div className="flex gap-2 sm:shrink-0">
                       <button
                         onClick={() => decideApplication(a.id, 'approved')}
                         className="px-4 py-2 rounded-lg bg-teal/20 text-teal text-sm font-bold hover:bg-teal/30"
@@ -134,7 +134,7 @@ function StaffDashboard() {
                     key={f.id}
                     className={`rounded-xl p-5 ${f.status === 'new' ? 'bg-gold/[0.06] border border-gold/20' : 'bg-white/[0.04]'}`}
                   >
-                    <div className="flex justify-between items-start">
+                    <div className="flex justify-between items-start gap-3">
                       <div>
                         <span className="font-bold text-gold">{f.rating}</span>
                         {f.controller_cid && (
@@ -144,7 +144,7 @@ function StaffDashboard() {
                         )}
                         {!f.controller_cid && <span className="ml-2 text-sm text-muted2">General feedback</span>}
                       </div>
-                      <span className="text-xs text-muted3">{new Date(f.created_at).toLocaleDateString()}</span>
+                      <span className="text-xs text-muted3 shrink-0">{new Date(f.created_at).toLocaleDateString()}</span>
                     </div>
                     {f.position && <div className="text-sm text-muted2 mt-1">{f.position}</div>}
                     {f.comments && <p className="text-sm mt-2">{f.comments}</p>}

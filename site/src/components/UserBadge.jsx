@@ -93,7 +93,7 @@ export function UserIdCard({ user }) {
           {getInitials(user.name)}
         </span>
         <div className="min-w-0 leading-tight">
-          <div className="font-extrabold text-base truncate">{user.name}</div>
+          <div className="font-extrabold text-base break-words">{user.name}</div>
           <div className="mt-1 font-mono text-[12.5px] font-semibold text-muted2">CID {user.cid}</div>
         </div>
       </div>

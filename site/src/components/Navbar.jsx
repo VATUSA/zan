@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { hasMinimumRole } from '../utils/roles'
 import Dropdown, { DropdownItem } from './Dropdown'
-import UserBadge from './UserBadge'
+import UserBadge, { UserIdCard } from './UserBadge'
 
 function Navbar() {
   const { user, loading, loginWithVatsim, loginAsDev, logout } = useAuth()
@@ -17,7 +17,7 @@ function Navbar() {
       <div className="flex flex-wrap items-center gap-4 px-6 sm:px-10 py-5">
         <Link to="/" className="flex items-center gap-3">
           <img src="/logo-no-text.png" alt="Anchorage ARTCC" className="w-10 h-10" />
-          <span className="font-extrabold text-[17px] tracking-tight">Anchorage ARTCC</span>
+          <span className="font-extrabold text-base sm:text-[17px] tracking-tight whitespace-nowrap">Anchorage ARTCC</span>
         </Link>
 
         {/* Desktop nav */}
@@ -83,31 +83,31 @@ function Navbar() {
 
       {/* Mobile menu panel */}
       {mobileOpen && (
-        <div className="lg:hidden border-t border-white/10 px-6 py-4 space-y-1">
-          <Link onClick={() => setMobileOpen(false)} to="/" className="block px-3 py-2.5 rounded-lg text-sm font-semibold text-muted hover:text-ink hover:bg-white/[0.06]">Home</Link>
-          <Link onClick={() => setMobileOpen(false)} to="/staff" className="block px-3 py-2.5 rounded-lg text-sm font-semibold text-muted hover:text-ink hover:bg-white/[0.06]">Staff</Link>
-          <Link onClick={() => setMobileOpen(false)} to="/events" className="block px-3 py-2.5 rounded-lg text-sm font-semibold text-muted hover:text-ink hover:bg-white/[0.06]">Events</Link>
+        <div className="lg:hidden border-t border-white/10 px-6 py-4 space-y-1 max-h-[calc(100dvh-81px)] overflow-y-auto overscroll-contain">
+          <Link onClick={() => setMobileOpen(false)} to="/" className="block px-3 py-3 rounded-lg text-[15px] font-semibold text-muted hover:text-ink hover:bg-white/[0.06]">Home</Link>
+          <Link onClick={() => setMobileOpen(false)} to="/staff" className="block px-3 py-3 rounded-lg text-[15px] font-semibold text-muted hover:text-ink hover:bg-white/[0.06]">Staff</Link>
+          <Link onClick={() => setMobileOpen(false)} to="/events" className="block px-3 py-3 rounded-lg text-[15px] font-semibold text-muted hover:text-ink hover:bg-white/[0.06]">Events</Link>
 
           <div className="pt-2 pb-1 px-3 text-[11px] font-bold text-muted3 uppercase tracking-wide">Facility</div>
-          <Link onClick={() => setMobileOpen(false)} to="/roster" className="block px-3 py-2.5 rounded-lg text-sm font-semibold text-muted hover:text-ink hover:bg-white/[0.06]">Roster</Link>
-          <Link onClick={() => setMobileOpen(false)} to="/files" className="block px-3 py-2.5 rounded-lg text-sm font-semibold text-muted hover:text-ink hover:bg-white/[0.06]">Files</Link>
-          <Link onClick={() => setMobileOpen(false)} to="/feedback" className="block px-3 py-2.5 rounded-lg text-sm font-semibold text-muted hover:text-ink hover:bg-white/[0.06]">Feedback</Link>
+          <Link onClick={() => setMobileOpen(false)} to="/roster" className="block px-3 py-3 rounded-lg text-[15px] font-semibold text-muted hover:text-ink hover:bg-white/[0.06]">Roster</Link>
+          <Link onClick={() => setMobileOpen(false)} to="/files" className="block px-3 py-3 rounded-lg text-[15px] font-semibold text-muted hover:text-ink hover:bg-white/[0.06]">Files</Link>
+          <Link onClick={() => setMobileOpen(false)} to="/feedback" className="block px-3 py-3 rounded-lg text-[15px] font-semibold text-muted hover:text-ink hover:bg-white/[0.06]">Feedback</Link>
           {canApply && (
-            <Link onClick={() => setMobileOpen(false)} to="/apply" className="block px-3 py-2.5 rounded-lg text-sm font-semibold text-muted hover:text-ink hover:bg-white/[0.06]">Apply to Visit</Link>
+            <Link onClick={() => setMobileOpen(false)} to="/apply" className="block px-3 py-3 rounded-lg text-[15px] font-semibold text-muted hover:text-ink hover:bg-white/[0.06]">Apply to Visit</Link>
           )}
 
           {user ? (
             <>
-              <div className="pt-2 pb-1 px-3 text-[11px] font-bold text-muted3 uppercase tracking-wide">
-                {user.name} · {user.rating} {user.zanRole && `· ${user.zanRole}`}
+              <div className="pt-3 pb-2">
+                <UserIdCard user={user} />
               </div>
-              <Link onClick={() => setMobileOpen(false)} to="/profile" className="block px-3 py-2.5 rounded-lg text-sm font-semibold text-muted hover:text-ink hover:bg-white/[0.06]">Profile</Link>
+              <Link onClick={() => setMobileOpen(false)} to="/profile" className="block px-3 py-3 rounded-lg text-[15px] font-semibold text-muted hover:text-ink hover:bg-white/[0.06]">Profile</Link>
               {isTaPlus && (
-                <Link onClick={() => setMobileOpen(false)} to="/staff-dashboard" className="block px-3 py-2.5 rounded-lg text-sm font-semibold text-muted hover:text-ink hover:bg-white/[0.06]">Staff Dashboard</Link>
+                <Link onClick={() => setMobileOpen(false)} to="/staff-dashboard" className="block px-3 py-3 rounded-lg text-[15px] font-semibold text-muted hover:text-ink hover:bg-white/[0.06]">Staff Dashboard</Link>
               )}
               <button
                 onClick={() => { logout(); setMobileOpen(false) }}
-                className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold text-muted hover:text-ink hover:bg-white/[0.06]"
+                className="w-full text-left px-3 py-3 rounded-lg text-[15px] font-semibold text-muted hover:text-ink hover:bg-white/[0.06]"
               >
                 Log out
               </button>
@@ -117,7 +117,7 @@ function Navbar() {
               <button
                 onClick={loginWithVatsim}
                 disabled={loading}
-                className="px-6 py-3 bg-gold hover:bg-goldLight text-navy font-bold text-sm rounded-full"
+                className="px-6 py-3.5 bg-gold hover:bg-goldLight text-navy font-bold text-[15px] rounded-full"
               >
                 {loading ? 'Connecting...' : 'Get started'}
               </button>

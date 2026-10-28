@@ -24,9 +24,76 @@ function RosterTable({ members, onChange }) {
   }
 
   return (
-    <div className="rounded-2xl overflow-hidden border border-white/10">
+    <>
+      {/* Phones: one card per controller instead of a wide table */}
+      <div className="md:hidden space-y-3">
+        {members.map((member) => {
+          const inactive = member.status === 'inactive'
+          const name = `${member.fname} ${member.lname}`
+          return (
+            <div
+              key={member.cid}
+              className={`rounded-2xl bg-white/[0.04] border border-white/10 p-4 ${inactive ? 'opacity-60' : ''}`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  {isStaff ? (
+                    <Link to={`/roster/member/${member.cid}`} className="font-bold break-words hover:text-teal">
+                      {name}
+                    </Link>
+                  ) : (
+                    <div className="font-bold break-words">{name}</div>
+                  )}
+                  <div className="text-xs text-muted3 mt-0.5">CID: {member.cid}</div>
+                </div>
+                <div className="flex flex-wrap justify-end gap-1.5 shrink-0">
+                  {member.initials && (
+                    <span className="text-xs font-bold px-2 py-1 rounded-full bg-purple/15 text-purple font-mono">
+                      {member.initials}
+                    </span>
+                  )}
+                  <span className="text-xs font-bold px-2 py-1 rounded-full bg-gold/15 text-gold">{member.rating}</span>
+                </div>
+              </div>
+
+              {(member.role || inactive) && (
+                <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+                  {member.role && <span className="text-muted2">{member.role}</span>}
+                  {inactive && (
+                    <span className="px-2 py-0.5 rounded-full bg-red-500/15 text-red-300 text-[10px] font-bold uppercase tracking-wide">
+                      Inactive
+                    </span>
+                  )}
+                </div>
+              )}
+
+              <div className="mt-3 flex flex-wrap gap-2">
+                {POSITIONS.map((pos) => {
+                  const has = member.endorsements.includes(pos)
+                  if (!isStaff && !has) return null
+                  return (
+                    <button
+                      key={pos}
+                      onClick={(e) => toggleEndorsement(member, pos, e)}
+                      disabled={!isStaff}
+                      className={`px-3 py-1.5 rounded-full text-xs font-bold ${
+                        has ? 'bg-teal/15 text-teal' : 'bg-white/[0.04] text-muted3 border border-white/10'
+                      } ${isStaff ? 'cursor-pointer' : 'cursor-default'}`}
+                      title={isStaff ? (has ? `Revoke ${pos}` : `Grant ${pos}`) : ''}
+                    >
+                      {has ? '● ' : ''}{pos}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+    <div className="hidden md:block rounded-2xl overflow-hidden border border-white/10">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[640px] text-sm">
+        <table className="w-full text-sm">
           <thead>
             <tr className="bg-white/[0.04] text-left text-muted2 uppercase text-xs tracking-wide">
               <th className="px-5 py-3 font-bold">Name</th>
@@ -102,6 +169,7 @@ function RosterTable({ members, onChange }) {
         </table>
       </div>
     </div>
+    </>
   )
 }
 

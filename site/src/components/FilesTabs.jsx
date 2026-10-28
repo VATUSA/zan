@@ -18,14 +18,14 @@ function FilesTabs() {
   const visibleTabs = TABS.filter((tab) => !tab.minRole || hasMinimumRole(user?.zanRole, tab.minRole))
 
   return (
-    <div className="flex border-b border-white/10 mb-8 flex-wrap">
+    <div className="flex border-b border-white/10 mb-8 overflow-x-auto whitespace-nowrap">
       {visibleTabs.map((tab) => {
         const isActive = location.pathname === tab.path
         return (
           <Link
             key={tab.path}
             to={tab.path}
-            className={`px-6 py-4 font-bold text-sm border-b-2 -mb-px ${
+            className={`px-4 sm:px-6 py-4 font-bold text-sm border-b-2 -mb-px ${
               isActive ? 'border-gold text-ink' : 'border-transparent text-muted2 hover:text-ink'
             }`}
           >

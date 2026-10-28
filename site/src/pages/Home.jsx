@@ -160,15 +160,15 @@ function Home() {
 
             <div className="flex flex-col gap-2.5">
               <div className="flex items-baseline gap-3 px-5 py-4 rounded-2xl bg-white/[0.05]">
-                <span className="text-2xl font-extrabold text-gold">S3+</span>
+                <span className="text-2xl font-extrabold whitespace-nowrap text-gold">S3+</span>
                 <span className="text-[13.5px] font-semibold text-muted2">Any home controller, division-wide</span>
               </div>
               <div className="flex items-baseline gap-3 px-5 py-4 rounded-2xl bg-white/[0.05]">
-                <span className="text-2xl font-extrabold text-teal">2 hrs</span>
+                <span className="text-2xl font-extrabold whitespace-nowrap text-teal">2 hrs</span>
                 <span className="text-[13.5px] font-semibold text-muted2">Minimum, every 6 months</span>
               </div>
               <div className="flex items-baseline gap-3 px-5 py-4 rounded-2xl bg-white/[0.05]">
-                <span className="text-2xl font-extrabold text-purple">No roster</span>
+                <span className="text-2xl font-extrabold whitespace-nowrap text-purple">No roster</span>
                 <span className="text-[13.5px] font-semibold text-muted2">Unless going for Tier 2</span>
               </div>
             </div>

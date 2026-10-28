@@ -22,7 +22,7 @@ class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-navy text-ink font-mulish grid place-items-center text-center px-10">
+        <div className="min-h-screen bg-navy text-ink font-mulish grid place-items-center text-center px-6 sm:px-10">
           <div>
             <p className="text-lg font-bold mb-2">Something went wrong.</p>
             <p className="text-muted2 mb-6">Try reloading the page.</p>

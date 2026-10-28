@@ -22,7 +22,7 @@ function Profile() {
     return (
       <div className="min-h-screen bg-navy text-ink font-mulish">
         <Navbar />
-        <div className="max-w-[720px] mx-auto px-10 py-24 text-center">
+        <div className="max-w-[720px] mx-auto px-6 sm:px-10 py-16 sm:py-24 text-center">
           <p className="text-muted">Log in with VATSIM to view your profile.</p>
         </div>
         <Footer />
@@ -34,11 +34,11 @@ function Profile() {
     <div className="min-h-screen bg-navy text-ink font-mulish">
       <Navbar />
 
-      <div className="max-w-[840px] mx-auto px-10 py-16">
-        <h1 className="text-4xl font-extrabold tracking-tight mb-2">My Profile</h1>
+      <div className="max-w-[840px] mx-auto px-6 sm:px-10 py-10 sm:py-16">
+        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2">My Profile</h1>
         <p className="text-muted mb-10">Your VATSIM and ZAN membership details.</p>
 
-        <div className="rounded-2xl bg-white/[0.04] p-8 mb-6">
+        <div className="rounded-2xl bg-white/[0.04] p-5 sm:p-8 mb-6">
           <div className="mb-8">
             <UserIdCard user={user} />
           </div>
@@ -105,7 +105,7 @@ function ProfileField({ label, value }) {
   return (
     <div>
       <div className="text-xs font-semibold text-muted2 mb-1 uppercase tracking-wide">{label}</div>
-      <div className="rounded-xl bg-white/[0.04] border border-white/10 px-4 py-3 text-ink truncate">
+      <div className="rounded-xl bg-white/[0.04] border border-white/10 px-4 py-3 text-ink break-words">
         {value}
       </div>
     </div>

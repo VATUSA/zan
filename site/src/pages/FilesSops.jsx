@@ -9,8 +9,8 @@ function FilesSops() {
   return (
     <div className="min-h-screen bg-navy text-ink font-mulish">
       <Navbar />
-      <div className="max-w-[900px] mx-auto px-10 py-16">
-        <h1 className="text-4xl font-extrabold tracking-tight mb-2">Files</h1>
+      <div className="max-w-[900px] mx-auto px-6 sm:px-10 py-10 sm:py-16">
+        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2">Files</h1>
         <p className="text-muted mb-8">SOPs, LOAs, training materials, and policies.</p>
         <FilesTabs />
         <FileList category="SOPs" files={files} loading={loading} onChange={refetch} />

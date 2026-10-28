@@ -35,7 +35,7 @@ function ApplyToVisit() {
     return (
       <div className="min-h-screen bg-navy text-ink font-mulish">
         <Navbar />
-        <div className="max-w-[720px] mx-auto px-10 py-24 text-center">
+        <div className="max-w-[720px] mx-auto px-6 sm:px-10 py-16 sm:py-24 text-center">
           <p className="text-muted">Log in with VATSIM to apply.</p>
         </div>
         <Footer />
@@ -78,8 +78,8 @@ function ApplyToVisit() {
     <div className="min-h-screen bg-navy text-ink font-mulish">
       <Navbar />
 
-      <div className="max-w-[720px] mx-auto px-10 py-16">
-        <h1 className="text-4xl font-extrabold tracking-tight mb-2">Apply to Visit</h1>
+      <div className="max-w-[720px] mx-auto px-6 sm:px-10 py-10 sm:py-16">
+        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2">Apply to Visit</h1>
         <p className="text-muted mb-10">
           Thanks for your interest in visiting Anchorage ARTCC.
         </p>
@@ -89,11 +89,11 @@ function ApplyToVisit() {
 
         {eligibility && (
           <>
-            <div className="rounded-2xl bg-white/[0.04] p-6 mb-8">
+            <div className="rounded-2xl bg-white/[0.04] p-5 sm:p-6 mb-8">
               <h2 className="font-bold text-lg mb-4">Visiting Checklist</h2>
               <ul className="space-y-2.5">
                 {eligibility.checklist.map((item, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm">
+                  <li key={i} className="flex items-start gap-3 text-sm">
                     {item.passed === true && <span className="text-teal">✓</span>}
                     {item.passed === false && <span className="text-red-400">✗</span>}
                     {item.passed === null && <span className="text-gold">?</span>}
@@ -108,7 +108,7 @@ function ApplyToVisit() {
               </ul>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
               <Field label="CID" value={eligibility.cid} />
               <Field label="Rating" value={eligibility.rating} />
               <Field label="First Name" value={eligibility.fname} />
@@ -134,7 +134,7 @@ function ApplyToVisit() {
                 <button
                   onClick={submitApplication}
                   disabled={!allRequiredPassed || submitting}
-                  className="px-7 py-3.5 rounded-full bg-gold hover:bg-goldLight disabled:bg-white/10 disabled:text-muted3 disabled:cursor-not-allowed text-navy font-bold text-[15px]"
+                  className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-gold hover:bg-goldLight disabled:bg-white/10 disabled:text-muted3 disabled:cursor-not-allowed text-navy font-bold text-[15px]"
                 >
                   {submitting ? 'Submitting...' : 'Submit Application'}
                 </button>
@@ -159,7 +159,7 @@ function Field({ label, value }) {
   return (
     <div>
       <div className="text-xs font-semibold text-muted2 mb-1">{label}</div>
-      <div className="rounded-xl bg-white/[0.04] border border-white/10 px-4 py-3 text-muted">
+      <div className="rounded-xl bg-white/[0.04] border border-white/10 px-4 py-3 text-muted break-words">
         {value}
       </div>
     </div>

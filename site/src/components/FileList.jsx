@@ -59,7 +59,7 @@ function FileList({ category, files, loading, onChange }) {
       {isSeniorStaff && (
         <form
           onSubmit={uploadFile}
-          className="rounded-2xl bg-gold/[0.06] border border-gold/20 p-6 mb-10"
+          className="rounded-2xl bg-gold/[0.06] border border-gold/20 p-5 sm:p-6 mb-10"
         >
           <h2 className="font-bold text-lg mb-4">Upload to {category}</h2>
           <div className="mb-4">
@@ -99,14 +99,14 @@ function FileList({ category, files, loading, onChange }) {
       {!loading && categoryFiles.length > 0 && (
         <div className="rounded-2xl border border-white/10 overflow-hidden divide-y divide-white/10">
           {categoryFiles.map((f) => (
-            <div key={f.id} className="flex items-center justify-between px-5 py-3.5 bg-white/[0.02]">
-              <div>
-                <div className="font-semibold text-sm">{f.title}</div>
-                <div className="text-xs text-muted3 mt-0.5">
+            <div key={f.id} className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3.5 bg-white/[0.02]">
+              <div className="min-w-0">
+                <div className="font-semibold text-sm break-words">{f.title}</div>
+                <div className="text-xs text-muted3 mt-0.5 break-all">
                   {f.original_name}
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 shrink-0">
                 
                 <a  href={`${API_URL}/api/files/${f.id}/download`}
                   target="_blank"

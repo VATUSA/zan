@@ -129,7 +129,7 @@ function EventDetail() {
     <div className="min-h-screen bg-navy text-ink font-mulish">
       <Navbar />
 
-      <div className="max-w-[800px] mx-auto px-10 py-16">
+      <div className="max-w-[800px] mx-auto px-6 sm:px-10 py-10 sm:py-16">
         <Link to="/events" className="text-sm text-muted2 hover:text-ink mb-6 inline-block">
           ← All events
         </Link>
@@ -147,7 +147,7 @@ function EventDetail() {
           </div>
         )}
 
-        <div className="flex items-center gap-3 mb-2">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-2">
           <span className="text-sm font-bold text-teal">
             {startDate.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
             {' · '}
@@ -158,12 +158,12 @@ function EventDetail() {
           )}
         </div>
 
-        <h1 className="text-4xl font-extrabold tracking-tight mb-4">{event.title}</h1>
-        <p className="text-muted leading-relaxed whitespace-pre-line mb-10">{event.body}</p>
+        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-4">{event.title}</h1>
+        <p className="text-muted leading-relaxed whitespace-pre-line break-words mb-10">{event.body}</p>
 
         {isStaff && (
-          <div className="rounded-2xl bg-gold/[0.06] border border-gold/20 p-6 mb-10">
-            <div className="flex items-center justify-between mb-5">
+          <div className="rounded-2xl bg-gold/[0.06] border border-gold/20 p-5 sm:p-6 mb-10">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
               <h2 className="font-bold text-lg">Staff Controls</h2>
               <button
                 onClick={toggleVisibility}
@@ -176,7 +176,7 @@ function EventDetail() {
             </div>
 
             <div className="text-sm font-semibold text-muted2 mb-2">Add Position</div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap sm:flex-nowrap gap-2">
               <select
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value)}
@@ -190,7 +190,7 @@ function EventDetail() {
                 value={newPosition}
                 onChange={(e) => setNewPosition(e.target.value.toUpperCase())}
                 placeholder="e.g. ANC_APP or LCL_1"
-                className="flex-1 rounded-lg bg-white/[0.04] border border-white/10 px-3 py-2 text-sm text-ink placeholder:text-muted3"
+                className="flex-1 min-w-[140px] rounded-lg bg-white/[0.04] border border-white/10 px-3 py-2 text-sm text-ink placeholder:text-muted3"
               />
               <button
                 onClick={addPosition}
@@ -209,7 +209,7 @@ function EventDetail() {
             <p className="text-muted2">No positions have been posted for this event yet.</p>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {CATEGORIES.map((category) => {
               const categoryPositions = positions.filter((p) => p.category === category)
               if (categoryPositions.length === 0) return null
@@ -287,7 +287,7 @@ function EventDetail() {
                 {signups.filter((s) => s.status === 'pending').map((s) => (
                   <div
                     key={s.id}
-                    className="flex items-center justify-between px-4 py-2.5 rounded-lg bg-gold/[0.06] border border-gold/20"
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-3 px-4 py-2.5 rounded-lg bg-gold/[0.06] border border-gold/20"
                   >
                     <span className="text-sm">
                       <span className="font-semibold">{s.name}</span>
