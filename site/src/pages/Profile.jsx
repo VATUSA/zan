@@ -52,6 +52,26 @@ function Profile() {
           </div>
         </div>
 
+        {/* Discord roles are handled by the VATUSA bot (configured for ZAN in
+            VATUSA/discord-bot-v3-config). Members link Discord on their VATUSA profile, and the
+            bot applies their ZAN roles - this just sends them to the right place. */}
+        <div className="rounded-2xl bg-white/[0.04] p-5 sm:p-6 mb-6">
+          <div className="text-xs font-semibold text-muted2 uppercase tracking-wide mb-2">Discord roles</div>
+          <p className="text-sm text-muted leading-relaxed">
+            Your ZAN Discord roles come from your VATUSA account. Link your Discord on your VATUSA
+            profile, then press the blue <span className="font-bold text-ink">Sync</span> button there to
+            get your roles straight away.
+          </p>
+          <a
+            href="https://www.vatusa.net/my/profile"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-flex w-full sm:w-auto justify-center items-center gap-2 px-6 py-3 rounded-full bg-gold hover:bg-goldLight text-navy font-bold text-sm"
+          >
+            Link &amp; sync Discord on VATUSA <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+
         {/* TEMP: Hours and Training Notes still need real data sources
             (VATSIM connect-time stats, an instructor notes table). */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
