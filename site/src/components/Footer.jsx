@@ -6,7 +6,7 @@ function Footer() {
       <div className="max-w-[1180px] mx-auto flex gap-8 flex-wrap items-start">
         <div className="max-w-[38ch]">
           <div className="flex items-center gap-3">
-            <img src="/logo-no-text.png" alt="" className="w-9 h-9" />
+            <img src="/ZAN-ARTCC-logo.png" alt="" className="w-9 h-9" />
             <span className="font-extrabold text-[15px] tracking-tight">Anchorage ARTCC</span>
           </div>
           <p className="mt-4 text-[13.5px] text-muted3 leading-relaxed">

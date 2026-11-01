@@ -16,7 +16,7 @@ function Navbar() {
     <header className="sticky top-0 z-40 bg-navy/80 backdrop-blur-xl">
       <div className="flex flex-wrap items-center gap-4 px-6 sm:px-10 py-5">
         <Link to="/" className="flex items-center gap-3">
-          <img src="/ZAN-ARTCC-logo-hires.png" alt="Anchorage ARTCC" className="w-10 h-10" />
+          <img src="/ZAN-ARTCC-logo.png" alt="Anchorage ARTCC" className="w-10 h-10" />
           <span className="font-extrabold text-base sm:text-[17px] tracking-tight whitespace-nowrap">Anchorage ARTCC</span>
         </Link>
 
