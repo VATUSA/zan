@@ -14,12 +14,6 @@ services:
       # token exchange fails with invalid_client.
       VATSIM_TOKEN_URL: ${VATSIM_TOKEN_URL:-https://auth.vatsim.net/oauth/token}
 
-      # Discord OAuth for account linking (routes/discord.js). Optional - the api boots
-      # without these, but /api/discord won't work until they're set.
-      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID:-}
-      DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET:-}
-      DISCORD_REDIRECT_URI: ${DISCORD_REDIRECT_URI:-}
-
       # VATUSA API
       VATUSA_API_KEY: ${VATUSA_API_KEY:?}
 

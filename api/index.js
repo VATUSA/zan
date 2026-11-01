@@ -16,7 +16,6 @@ import eventsRoutes from './routes/events.js'
 import filesRoutes from './routes/files.js'
 import { seedInitialRoles } from './db.js'
 import { attachUser } from './middleware/auth.js'
-import discordRoutes from './routes/discord.js'
 import adminRoutes from './routes/admin.js'
 import weatherRoutes from './routes/weather.js'
 
@@ -82,7 +81,6 @@ app.use('/api/apply', strictLimiter, applyRoutes)
 app.use('/api/feedback', strictLimiter, feedbackRoutes)
 app.use('/api/events', eventsRoutes)
 app.use('/api/files', filesRoutes)
-app.use('/api/discord', discordRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/weather', weatherRoutes)
 

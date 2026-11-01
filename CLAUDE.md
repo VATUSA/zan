@@ -8,7 +8,7 @@ for setup and env vars.
 
 - `api/`: Express 5 ES modules, entry point `index.js` (port `PORT`, default 4000).
   - `routes/`: one file per feature (auth, roster, apply, events, feedback, files, admin,
-    discord, weather).
+    weather).
   - `middleware/auth.js`: session/role checks. `utils/`: eligibility, roles, VATUSA role
     sync, session, validation.
   - `db.js`: SQLite via `better-sqlite3` on `zan.db`. Tables are created inline with

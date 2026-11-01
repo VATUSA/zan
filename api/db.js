@@ -456,28 +456,4 @@ export function setMemberStatus(cid, status, updatedBy) {
       updated_at = datetime('now')
   `).run(cid, status, updatedBy)
 }
-
-// bot 
-db.exec(`
-  CREATE TABLE IF NOT EXISTS discord_links (
-    cid INTEGER PRIMARY KEY,
-    discord_id TEXT NOT NULL UNIQUE,
-    linked_at TEXT NOT NULL DEFAULT (datetime('now'))
-  )
-`)
-
-export function getDiscordLink(cid) {
-  return db.prepare('SELECT * FROM discord_links WHERE cid = ?').get(cid)
-}
-
-export function linkDiscord(cid, discordId) {
-  db.prepare(`
-    INSERT INTO discord_links (cid, discord_id) VALUES (?, ?)
-    ON CONFLICT(cid) DO UPDATE SET discord_id = excluded.discord_id, linked_at = datetime('now')
-  `).run(cid, discordId)
-}
-
-export function unlinkDiscord(cid) {
-  db.prepare('DELETE FROM discord_links WHERE cid = ?').run(cid)
-}
 export default db

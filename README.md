@@ -7,7 +7,7 @@ history.
 
 | Dir | What | Stack |
 |-----|------|-------|
-| `api/` | Backend API: VATSIM Connect login, roster, endorsements, visiting applications, events, feedback, files, weather, Discord linking, VATUSA role sync | Node.js, Express 5, SQLite (`better-sqlite3`) |
+| `api/` | Backend API: VATSIM Connect login, roster, endorsements, visiting applications, events, feedback, files, weather, VATUSA role sync | Node.js, Express 5, SQLite (`better-sqlite3`) |
 | `site/` | Frontend SPA | React 19, React Router 7, Vite, Tailwind CSS 3; served by nginx in Docker |
 
 ## Local development
