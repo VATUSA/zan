@@ -30,6 +30,9 @@ const ALLOWED_TYPES = {
   '.jpeg': 'image/jpeg',
   '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  // Browsers disagree on the zip mimetype (Windows commonly reports the x- form). Zips are
+  // never served inline: the download route only uses inline for PDFs.
+  '.zip': ['application/zip', 'application/x-zip-compressed'],
 }
 
 const upload = multer({
@@ -37,7 +40,7 @@ const upload = multer({
   limits: { fileSize: 20 * 1024 * 1024 }, // 20MB cap
   fileFilter: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase()
-    if (ALLOWED_TYPES[ext] !== file.mimetype) {
+    if (![].concat(ALLOWED_TYPES[ext]).includes(file.mimetype)) {
       req.fileRejected = true
       return cb(null, false)
     }
@@ -82,7 +85,7 @@ router.post('/', requireRole('TA'), upload.single('file'), (req, res) => {
   const { title, category } = req.body
 
   if (req.fileRejected) {
-    return res.status(400).json({ error: 'File type not allowed (pdf, png, jpg, docx, xlsx only)' })
+    return res.status(400).json({ error: 'File type not allowed (pdf, png, jpg, docx, xlsx, zip only)' })
   }
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' })

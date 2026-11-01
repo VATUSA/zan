@@ -14,6 +14,8 @@ for setup and env vars.
   - `db.js`: SQLite via `better-sqlite3` on `zan.db`. Tables are created inline with
     `CREATE TABLE IF NOT EXISTS`, and there's no migration tool, so schema changes go
     here and must be safe to run against an existing database.
+  - `scripts/import-legacy-files.js`: re-runnable load of the old site's documents; run it
+    once per environment from `/app` in the api pod.
   - Tests: `node --test` (`npm test`), colocated as `utils/*.test.js`.
 - `site/`: React 19 + Vite SPA, JSX (not TypeScript), Tailwind 3. Pages are in
   `src/pages/`; shared pieces are in `src/components`, `src/context`, `src/hooks` and

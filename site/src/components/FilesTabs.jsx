@@ -6,6 +6,8 @@ const TABS = [
   { label: 'SOPs', path: '/files/sops' },
   { label: 'LOAs', path: '/files/loas' },
   { label: 'Training', path: '/files/training' },
+  { label: 'Policies', path: '/files/policies' },
+  { label: 'Resources', path: '/files/resources' },
   { label: 'Admin Policies', path: '/files/admin', minRole: 'TA' },
 ]
 

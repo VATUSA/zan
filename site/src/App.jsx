@@ -17,6 +17,8 @@ import EventDetail from './pages/EventDetail'
 import FilesSops from './pages/FilesSops'
 import FilesLoas from './pages/FilesLoas'
 import FilesTraining from './pages/FilesTraining'
+import FilesPolicies from './pages/FilesPolicies'
+import FilesResources from './pages/FilesResources'
 import FilesAdmin from './pages/FilesAdmin'
 function App() {
   return (
@@ -39,6 +41,8 @@ function App() {
 <Route path="/files/sops" element={<FilesSops />} />
 <Route path="/files/loas" element={<FilesLoas />} />
 <Route path="/files/training" element={<FilesTraining />} />
+<Route path="/files/policies" element={<FilesPolicies />} />
+<Route path="/files/resources" element={<FilesResources />} />
 <Route path="/files/admin" element={<RequireRole role="TA"><FilesAdmin /></RequireRole>} />
           <Route
             path="/roster/member/:cid"
