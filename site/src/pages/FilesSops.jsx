@@ -1,11 +1,8 @@
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import FilesTabs from '../components/FilesTabs'
-import FileList from '../components/FileList'
-import { useFiles } from '../hooks/useFiles'
 
 function FilesSops() {
-  const { files, loading, refetch } = useFiles()
   return (
     <div className="min-h-screen bg-navy text-ink font-mulish">
       <Navbar />
@@ -13,7 +10,17 @@ function FilesSops() {
         <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2">Files</h1>
         <p className="text-muted mb-8">SOPs, LOAs, training materials, policies, and resources.</p>
         <FilesTabs />
-        <FileList category="SOPs" files={files} loading={loading} onChange={refetch} />
+        <p className="text-2xl sm:text-3xl font-bold break-words">
+          For SOPs, see{' '}
+          <a
+            href="https://sops.zanartcc.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gold hover:text-goldLight underline"
+          >
+            sops.zanartcc.org
+          </a>
+        </p>
       </div>
       <Footer />
     </div>
